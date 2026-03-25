@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenstarMate AI 리포트 — SK네트웍스서비스</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --primary: #1B3A5C;
+    --primary-light: #2E5F94;
+    --secondary: #2E75B6;
+    --accent: #00A3E0;
+    --accent-light: #E8F6FC;
+    --bg: #F8FAFC;
+    --bg-card: #FFFFFF;
+    --border: #E2E8F0;
+    --text: #1A202C;
+    --text-muted: #64748B;
+    --text-light: #94A3B8;
+    --green: #10B981;
+    --green-bg: #ECFDF5;
+    --amber: #F59E0B;
+    --amber-bg: #FFFBEB;
+    --red: #EF4444;
+    --red-bg: #FEF2F2;
+    --sidebar-w: 280px;
+    --header-h: 68px;
+    --radius: 6px;
+    --radius-sm: 4px;
+    --shadow: 0 1px 4px rgba(0,0,0,.06);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #EEF2F7;
+    background-image: radial-gradient(#C8D3E0 1px, transparent 1px);
+    background-size: 26px 26px;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--header-h);
+    background: var(--primary);
+    display: flex; align-items: center; padding: 0 28px;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.2);
+  }
+  .header-logo {
+    display: flex; align-items: center; gap: 10px;
+    color: #fff; font-weight: 800; font-size: 18px; letter-spacing: -.3px;
+  }
+  .header-logo .logo-badge {
+    background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 700; letter-spacing: .5px;
+    padding: 2px 7px; border-radius: 4px; text-transform: uppercase;
+  }
+  .header-divider { width: 1px; height: 28px; background: rgba(255,255,255,.2); }
+  .header-meta { color: rgba(255,255,255,.75); font-size: 13px; }
+  .header-meta strong { color: #fff; font-weight: 600; }
+  .header-spacer { flex: 1; }
+  .header-date { color: rgba(255,255,255,.6); font-size: 12px; }
+  .header-ai-badge {
+    background: rgba(0,163,224,.2); border: 1px solid rgba(0,163,224,.4);
+    color: var(--accent); font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px; letter-spacing: .3px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .header-ai-badge::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    position: fixed; top: var(--header-h); left: 0; bottom: 0; z-index: 90;
+    width: var(--sidebar-w);
+    background: #fff;
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 24px 0;
+    display: flex; flex-direction: column;
+    box-shadow: 2px 0 12px rgba(27,58,92,.06);
+  }
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── Sidebar top brand strip ── */
+  .sidebar-brand {
+    padding: 8px 16px 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .sidebar-brand .sb-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--text-light); margin-bottom: 4px;
+  }
+  .sidebar-brand .sb-title {
+    font-size: 13px; font-weight: 700; color: var(--primary); line-height: 1.3;
+  }
+
+  /* ── Nav items ── */
+  .nav-group-label {
+    font-size: 9px; font-weight: 700; color: var(--text-light);
+    letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 12px 16px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 10px; margin: 1px 8px;
+    border-radius: 7px; border: none;
+    cursor: pointer; text-decoration: none;
+    color: var(--text-muted); font-size: 13px; font-weight: 500;
+    transition: background .15s, color .15s;
+    position: relative;
+  }
+  .nav-item:hover { background: #EEF2F7; color: var(--primary); }
+  .nav-item.active { background: var(--primary); color: #fff; font-weight: 600; }
+  .nav-item.active .ni-icon svg { stroke: #fff; }
+  .nav-item:hover:not(.active) .ni-icon svg { stroke: var(--primary); }
+
+  /* icon container */
+  .ni-icon {
+    width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; transition: background .15s;
+  }
+  .ni-icon svg { width: 15px; height: 15px; stroke: var(--text-light); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: stroke .15s; }
+  .nav-item.active .ni-icon { background: rgba(255,255,255,.15); }
+
+  .nav-badge {
+    margin-left: auto; font-size: 10px; font-weight: 700;
+    background: var(--accent); color: #fff;
+    padding: 1px 7px; border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .nav-item.active .nav-badge { background: rgba(255,255,255,.25); color: #fff; }
+
+  /* ── Sidebar footer ── */
+  .sidebar-footer {
+    margin-top: auto; padding: 14px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .sidebar-client-box {
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    background: #F0F4F8; border: 1px solid var(--border);
+  }
+  .sidebar-client-box .label {
+    font-size: 9px; font-weight: 700; letter-spacing: .8px;
+    text-transform: uppercase; color: var(--text-light); margin-bottom: 4px;
+  }
+  .sidebar-client-box .name { font-size: 13px; font-weight: 700; color: var(--primary); }
+  .sidebar-client-box .sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── MAIN ── */
+  #main {
+    margin-left: var(--sidebar-w);
+    margin-top: var(--header-h);
+    padding: 20px 24px 40px;
+    min-height: calc(100vh - var(--header-h));
+  }
+
+  /* ── SECTION BASE ── */
+  .section {
+    padding: 40px 44px; border-bottom: none; margin: 0 0 12px 0;
+    background: var(--bg-card); border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(27,58,92,.07);
+    opacity: 0; transform: translateY(18px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .section.in-view { opacity: 1; transform: translateY(0); }
+  .section-header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .section-tag {
+    display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .section-title { font-size: 20px; font-weight: 700; color: var(--primary); letter-spacing: -.3px; }
+  .section-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    box-shadow: 0 1px 6px rgba(27,58,92,.05);
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* ── S0: HERO ── */
+  #s0 {
+    background: linear-gradient(135deg, var(--primary) 0%, #0d2440 60%, #0a1f38 100%);
+    padding: 64px 48px; border-bottom: none;
+    border-radius: 10px; box-shadow: 0 4px 24px rgba(27,58,92,.18);
+    opacity: 1 !important; transform: none !important; /* always visible */
+  }
+  .hero-kicker {
+    font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-kicker::before { content: ''; display: block; width: 24px; height: 2px; background: var(--accent); }
+  .hero-title { font-size: 40px; font-weight: 900; color: #fff; letter-spacing: -1px; line-height: 1.2; margin-bottom: 10px; }
+  .hero-title span { color: var(--accent); }
+  .hero-sub { font-size: 17px; color: rgba(255,255,255,.65); margin-bottom: 40px; }
+  .hero-stats { display: flex; gap: 40px; margin-bottom: 48px; }
+  .hero-stat { border-left: 3px solid var(--accent); padding-left: 16px; }
+  .hero-stat .val { font-size: 28px; font-weight: 800; color: #fff; }
+  .hero-stat .lbl { font-size: 12px; color: rgba(255,255,255,.55); margin-top: 2px; }
+  .hero-top3-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: rgba(255,255,255,.5); margin-bottom: 16px;
+  }
+  .hero-top3 { display: flex; gap: 16px; }
+  .hero-top3-card {
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14);
+    border-radius: var(--radius); padding: 24px;
+    flex: 1; position: relative; overflow: hidden;
+  }
+  .hero-top3-card .rank {
+    position: absolute; top: 14px; right: 16px;
+    font-size: 48px; font-weight: 900; color: rgba(255,255,255,.04);
+    line-height: 1;
+  }
+  .hero-top3-card .building-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .hero-top3-card .district-tag {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; display: inline-block; margin-bottom: 12px;
+  }
+  .hero-top3-card .enoc-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+  .hero-top3-card .enoc-lbl { font-size: 11px; color: rgba(255,255,255,.5); }
+  .hero-top3-card .reason { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 10px; border-top: 1px solid rgba(255,255,255,.1); padding-top: 10px; }
+  .badge-green { background: rgba(16,185,129,.2); color: #6EE7B7; }
+  .badge-amber { background: rgba(245,158,11,.2); color: #FCD34D; }
+  .badge-red { background: rgba(239,68,68,.2); color: #FCA5A5; }
+  .badge-blue { background: rgba(0,163,224,.2); color: #7DD3FC; }
+
+  /* ── S1: CONDITIONS ── */
+  .cond-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: #fff; margin-bottom: 20px; overflow: hidden;
+    box-shadow: 0 1px 6px rgba(27,58,92,.05);
+  }
+  .cond-item { padding: 20px 24px; border-right: 1px solid var(--border); }
+  .cond-item:last-child { border-right: none; }
+  .cond-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+  .cond-value { font-size: 22px; font-weight: 800; color: var(--primary); line-height: 1.1; margin-bottom: 4px; }
+  .cond-note { font-size: 12px; color: var(--text-muted); }
+  .req-list {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px 40px; list-style: none;
+  }
+  .req-list li {
+    font-size: 13px; color: var(--text);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .req-list li::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+  }
+
+  /* ── S2: MARKET ── */
+  .market-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+  .market-district-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: #fff; margin-bottom: 24px; overflow: hidden;
+    box-shadow: 0 1px 6px rgba(27,58,92,.05);
+  }
+  .district-card {
+    padding: 18px 16px; text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .district-card:last-child { border-right: none; }
+  .district-card.highlight { background: var(--accent-light); }
+  .district-card .d-name { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .district-card .d-rate { font-size: 26px; font-weight: 800; color: var(--primary); line-height: 1; }
+  .district-card .d-change {
+    font-size: 11px; font-weight: 600; margin-top: 5px;
+    display: inline-flex; align-items: center; gap: 2px;
+  }
+  .d-change.up { color: var(--red); }
+  .d-change.down { color: var(--green); }
+  .chart-wrap { position: relative; height: 240px; }
+  .chart-wrap-sm { position: relative; height: 200px; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 16px; }
+
+  /* ── S3: MAP ── */
+  .map-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+  .map-container {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 0; overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  #leafletMap { width: 100%; height: 600px; border-radius: var(--radius) var(--radius) 0 0; }
+  .leaflet-popup-content-wrapper { border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,.18) !important; border: 1px solid #E2E8F0 !important; padding: 0 !important; overflow: hidden; }
+  .leaflet-popup-content { margin: 0 !important; padding: 0 !important; }
+  .leaflet-popup-tip { background: #fff !important; }
+  .leaflet-control-zoom a { font-family: Pretendard, sans-serif !important; }
+  .leaflet-bar { border: 1px solid var(--border) !important; border-radius: 8px !important; overflow: hidden; box-shadow: var(--shadow) !important; }
+  .leaflet-bar a { border-bottom-color: var(--border) !important; color: var(--primary) !important; font-weight: 700 !important; }
+  .map-legend { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .map-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .map-list {
+    display: flex; flex-direction: column; gap: 8px;
+    max-height: 534px; /* 8개 × 58px + 7 × 8px gap */
+    overflow-y: auto;
+  }
+  .map-list::-webkit-scrollbar { width: 4px; }
+  .map-list::-webkit-scrollbar-track { background: transparent; }
+  .map-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .map-list-item {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 16px;
+    cursor: pointer; transition: all .18s;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .map-list-item:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,163,224,.15); }
+  .map-list-item.highlighted { border-color: var(--accent); background: var(--accent-light); }
+  .map-pin-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .map-list-item .item-info { flex: 1; min-width: 0; }
+  .map-list-item .item-name { font-size: 13px; font-weight: 600; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .map-list-item .item-district { font-size: 11px; color: var(--text-muted); }
+  .map-list-item .item-enoc { font-size: 13px; font-weight: 700; }
+
+  /* ── S4: BUILDINGS ── */
+  .buildings-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .bldg-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+    transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s, border-color .2s;
+    cursor: pointer; position: relative;
+    box-shadow: 0 2px 8px rgba(27,58,92,.07);
+  }
+  .bldg-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 12px 32px rgba(0,163,224,.18), 0 2px 8px rgba(27,58,92,.06);
+  }
+  .bldg-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent), 0 8px 24px rgba(0,163,224,.16);
+  }
+
+  /* Photo — separate inner div for zoom effect */
+  .bldg-photo {
+    height: 200px; position: relative; overflow: hidden;
+  }
+  .bldg-photo-img {
+    position: absolute; inset: 0;
+    background-size: cover !important;
+    background-position: center !important;
+    transition: transform .5s cubic-bezier(.4,0,.2,1);
+  }
+  .bldg-card:hover .bldg-photo-img { transform: scale(1.09); }
+  /* dark gradient overlay — fades in on hover */
+  .bldg-photo-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 35%, rgba(10,25,50,.62) 100%);
+    opacity: 0; transition: opacity .3s ease;
+  }
+  .bldg-card:hover .bldg-photo-overlay { opacity: 1; }
+  /* building name on photo — slides up on hover */
+  .bldg-photo-name {
+    position: absolute; bottom: 12px; left: 14px; right: 42px;
+    font-size: 14px; font-weight: 800; color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,.5);
+    transform: translateY(6px); opacity: 0;
+    transition: transform .3s ease, opacity .3s ease;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .bldg-card:hover .bldg-photo-name { transform: translateY(0); opacity: 1; }
+
+  .bldg-photo .rank-badge {
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 4px;
+    letter-spacing: .3px;
+  }
+  .bldg-photo .compare-btn {
+    position: absolute; top: 8px; right: 8px; z-index: 2;
+    width: 28px; height: 28px; border-radius: 6px;
+    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
+    backdrop-filter: blur(4px);
+    color: #fff; font-size: 16px; font-weight: 400; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .bldg-photo .compare-btn:hover { background: var(--accent); border-color: var(--accent); transform: scale(1.1); }
+  .bldg-card.selected .compare-btn { background: var(--accent); border-color: var(--accent); }
+
+  /* left accent bar on selected */
+  .bldg-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: var(--accent);
+    transform: scaleY(0); transition: transform .25s ease;
+    transform-origin: bottom; z-index: 1;
+  }
+  .bldg-card:hover::before, .bldg-card.selected::before { transform: scaleY(1); }
+
+  .bldg-body { padding: 14px 14px 12px; }
+  .bldg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .bldg-name { font-size: 13px; font-weight: 700; color: var(--primary); }
+  .bldg-district-tag {
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 4px; white-space: nowrap;
+  }
+  .tag-cbd { background: #EFF6FF; color: #1D4ED8; }
+  .tag-dmc { background: #F0FDF4; color: #15803D; }
+
+  /* ENOC focal */
+  .enoc-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .enoc-num { font-size: 24px; font-weight: 900; line-height: 1; }
+  .enoc-unit { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .enoc-label-sm { font-size: 10px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 3px; }
+  .enoc-green { color: var(--green); }
+  .enoc-amber { color: var(--amber); }
+  .enoc-red { color: var(--red); }
+
+  .bldg-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .spec-item .spec-lbl { font-size: 9px; color: var(--text-light); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+  .spec-item .spec-val { font-size: 12px; font-weight: 600; color: var(--text); margin-top: 1px; }
+  .bldg-footer {
+    padding: 9px 14px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    background: #FAFBFD;
+  }
+  .bldg-footer .detail-link {
+    font-size: 12px; color: var(--accent); font-weight: 600;
+    text-decoration: none; cursor: pointer;
+    display: flex; align-items: center; gap: 3px;
+    transition: gap .15s;
+  }
+  .bldg-card:hover .bldg-footer .detail-link { gap: 6px; }
+
+  /* ── S5: COST ── */
+  .cost-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .enoc-chart-wrap { height: 320px; }
+  .cost-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cost-table th {
+    background: var(--primary); color: #fff; font-weight: 600;
+    padding: 10px 14px; text-align: left; font-size: 11px; letter-spacing: .3px;
+  }
+  .cost-table th:first-child { border-radius: 8px 0 0 0; }
+  .cost-table th:last-child { border-radius: 0 8px 0 0; }
+  .cost-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .cost-table tr:hover td { background: var(--bg); }
+  .cost-table .enoc-cell { font-weight: 700; }
+  .cost-table .note-cell { font-size: 11px; color: var(--text-muted); }
+
+  /* ── S6: ENVIRONMENT ── */
+  .env-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .env-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+  }
+  .env-card .env-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+  .env-card .env-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+  .env-score { margin-top: 14px; }
+  .env-score-bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+  .env-score-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 1s cubic-bezier(.4,0,.2,1); }
+  .env-score-label { font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; }
+
+  /* ── S7: TEST-FIT ── */
+  .testfit-layout { display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: start; }
+  .floor-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .floor-tab {
+    padding: 7px 18px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-muted); transition: all .15s;
+  }
+  .floor-tab.active {
+    background: var(--primary); color: #fff; border-color: var(--primary);
+  }
+  .floorplan-container {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  #floorplanSvg { width: 100%; height: 480px; }
+  .room-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .room-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+  .room-legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+  .generate-panel { }
+  .generate-settings { margin-bottom: 20px; }
+  .setting-row { margin-bottom: 14px; }
+  .setting-row label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .3px; }
+  .setting-row input[type=range] { width: 100%; accent-color: var(--accent); }
+  .setting-row .range-val { font-size: 14px; font-weight: 700; color: var(--primary); }
+  .setting-row select, .setting-row input[type=number] {
+    width: 100%; padding: 8px 12px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 13px; color: var(--text);
+    background: var(--bg-card);
+  }
+  .generate-btn {
+    width: 100%; padding: 14px;
+    background: var(--primary); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: background .15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .generate-btn:hover { background: var(--secondary); }
+  .generate-btn.loading { background: var(--text-muted); cursor: wait; }
+  .generate-btn .spinner {
+    width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .7s linear infinite; display: none;
+  }
+  .generate-btn.loading .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .stats-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .stat-box {
+    background: var(--bg); border-radius: var(--radius-sm);
+    padding: 12px; text-align: center;
+  }
+  .stat-box .s-val { font-size: 20px; font-weight: 800; color: var(--primary); }
+  .stat-box .s-lbl { font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 2px; text-transform: uppercase; }
+
+  /* ── S8: COMPETITORS ── */
+  .radar-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+  .radar-wrap { height: 320px; }
+  .competitor-list { }
+  .competitor-item {
+    padding: 14px 16px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 14px;
+    background: var(--bg-card);
+  }
+  .competitor-rank { font-size: 18px; font-weight: 900; color: var(--border); width: 24px; }
+  .competitor-name { font-size: 14px; font-weight: 600; color: var(--primary); flex: 1; }
+  .competitor-score { font-size: 13px; font-weight: 700; }
+  .score-bar-wrap { flex: 2; }
+  .score-bar-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 3px; }
+
+  /* ── S9: SCHEDULE ── */
+  .timeline { position: relative; padding-left: 40px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 14px; top: 4px; bottom: 4px;
+    width: 2px; background: var(--border);
+  }
+  .timeline-item { position: relative; margin-bottom: 32px; }
+  .timeline-dot {
+    position: absolute; left: -33px; top: 4px;
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 0 0 2px currentColor;
+  }
+  .timeline-dot.done { background: var(--green); color: var(--green); }
+  .timeline-dot.active { background: var(--accent); color: var(--accent); animation: ring 1.5s infinite; }
+  .timeline-dot.todo { background: var(--border); color: var(--border); }
+  @keyframes ring { 0%,100%{box-shadow:0 0 0 2px currentColor} 50%{box-shadow:0 0 0 5px rgba(0,163,224,.3)} }
+  .timeline-month { font-size: 11px; font-weight: 700; color: var(--text-light); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 4px; }
+  .timeline-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+  .timeline-desc { font-size: 13px; color: var(--text-muted); }
+  .timeline-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .tl-tag { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); }
+  .tl-tag.active { background: var(--accent-light); border-color: rgba(0,163,224,.3); color: var(--secondary); }
+
+  /* ── COMPARE BAR ── */
+  #compareBar {
+    position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; z-index: 200;
+    background: var(--primary);
+    padding: 14px 32px; display: flex; align-items: center; gap: 20px;
+    box-shadow: 0 -4px 24px rgba(0,0,0,.2);
+    transform: translateY(100%); transition: transform .3s cubic-bezier(.4,0,.2,1);
+  }
+  #compareBar.visible { transform: translateY(0); }
+  .compare-label { color: rgba(255,255,255,.7); font-size: 13px; white-space: nowrap; }
+  .compare-items { display: flex; gap: 10px; flex: 1; }
+  .compare-chip {
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 20px; padding: 5px 14px;
+    color: #fff; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .compare-chip .chip-remove { cursor: pointer; opacity: .6; font-size: 14px; line-height: 1; }
+  .compare-chip .chip-remove:hover { opacity: 1; }
+  .compare-chip-placeholder {
+    border: 1px dashed rgba(255,255,255,.25);
+    border-radius: 20px; padding: 5px 20px;
+    color: rgba(255,255,255,.35); font-size: 12px;
+  }
+  .compare-action-btn {
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    padding: 9px 20px; font-family: inherit;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    white-space: nowrap; transition: background .15s;
+  }
+  .compare-action-btn:hover { background: #008fc4; }
+  .compare-clear { background: none; border: none; color: rgba(255,255,255,.5); font-family: inherit; font-size: 12px; cursor: pointer; }
+  .compare-clear:hover { color: #fff; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg-card); border-radius: var(--radius);
+    padding: 32px; max-width: 800px; width: 90%;
+    max-height: 80vh; overflow-y: auto;
+    transform: translateY(20px); transition: transform .2s;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .modal-title { font-size: 20px; font-weight: 800; color: var(--primary); }
+  .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .compare-table th { background: var(--bg); padding: 10px 14px; font-weight: 700; text-align: left; border-bottom: 2px solid var(--border); }
+  .compare-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table .best { color: var(--green); font-weight: 700; }
+
+  /* ── PARTITION / STEPPER / OPTION CHECK ── */
+  .panel-sep { font-size: 10px; font-weight: 700; color: var(--text-light); letter-spacing: 1px; text-transform: uppercase; margin: 16px 0 8px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .type-toggle { display: flex; gap: 6px; }
+  .type-btn { flex: 1; padding: 7px 8px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--bg-card); font-family: inherit; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all .15s; }
+  .type-btn.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .stepper-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .stepper-row:last-child { border-bottom: none; }
+  .stepper-row .s-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .stepper { display: flex; align-items: center; gap: 2px; }
+  .stepper-btn { width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--border); background: var(--bg); font-size: 15px; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: all .12s; }
+  .stepper-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .stepper-val { width: 32px; text-align: center; font-size: 14px; font-weight: 800; color: var(--primary); }
+  .option-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opt-check { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all .15s; user-select: none; }
+  .opt-check.on { border-color: var(--accent); background: var(--accent-light); }
+  .opt-check .oc-box { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; transition: all .15s; }
+  .opt-check.on .oc-box { background: var(--accent); border-color: var(--accent); }
+  .opt-check .oc-box::after { content: '✓'; }
+  .opt-check .oc-lbl { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  .opt-check.on .oc-lbl { color: var(--primary); }
+
+  /* ── TOOLTIP ── */
+  [data-tip] { position: relative; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+    background: #1A202C; color: #fff;
+    font-size: 11px; font-weight: 500; white-space: nowrap;
+    padding: 5px 10px; border-radius: 6px;
+    pointer-events: none; z-index: 300;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="header-logo">
+    <span>GenstarMate</span>
+    <span class="logo-badge">AI</span>
+  </div>
+  <div class="header-divider"></div>
+  <div class="header-meta"><strong>SK네트웍스서비스</strong> 오피스 이전 검토 리포트</div>
+  <div class="header-spacer"></div>
+  <div class="header-date">보고일: 2026.02.10</div>
+  <div class="header-ai-badge">AI 분석 완료</div>
+</header>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+
+  <div class="sidebar-brand">
+    <div class="sb-label">Report Navigator</div>
+    <div class="sb-title">오피스 이전 검토<br>리포트</div>
+  </div>
+
+  <div class="nav-group-label">리포트 구성</div>
+
+  <a class="nav-item active" href="#s0" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><path d="M2 7L8 2L14 7V14H10V10H6V14H2V7Z"/></svg></span>
+    개요 및 추천
+  </a>
+  <a class="nav-item" href="#s1" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><rect x="3" y="2" width="10" height="12" rx="1.5"/><line x1="5.5" y1="5.5" x2="10.5" y2="5.5"/><line x1="5.5" y1="8" x2="10.5" y2="8"/><line x1="5.5" y1="10.5" x2="8.5" y2="10.5"/></svg></span>
+    이전 조건
+  </a>
+  <a class="nav-item" href="#s2" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><rect x="2" y="9" width="2.5" height="5" rx=".5"/><rect x="6.75" y="5.5" width="2.5" height="8.5" rx=".5"/><rect x="11.5" y="2" width="2.5" height="12" rx=".5"/><polyline points="2,7.5 5.5,4.5 9.5,6.5 14,3"/></svg></span>
+    시장 현황
+  </a>
+  <a class="nav-item" href="#s3" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><path d="M8 1.5C5.52 1.5 3.5 3.52 3.5 6C3.5 9.5 8 14.5 8 14.5S12.5 9.5 12.5 6C12.5 3.52 10.48 1.5 8 1.5Z"/><circle cx="8" cy="6" r="1.8"/></svg></span>
+    입지 지도
+  </a>
+  <a class="nav-item" href="#s4" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><rect x="2" y="7" width="5" height="7" rx=".5"/><rect x="9" y="7" width="5" height="7" rx=".5"/><rect x="4.5" y="2" width="7" height="5" rx=".5"/><line x1="8" y1="7" x2="8" y2="14"/></svg></span>
+    물건 목록
+    <span class="nav-badge">9</span>
+  </a>
+  <a class="nav-item" href="#s5" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><line x1="8" y1="2" x2="8" y2="14"/><path d="M5.5 5C5.5 3.9 6.6 3 8 3S10.5 3.9 10.5 5C10.5 6.1 9.4 7 8 7S5.5 7.9 5.5 9C5.5 10.1 6.6 11 8 11S10.5 10.1 10.5 9"/></svg></span>
+    비용 분석
+  </a>
+  <a class="nav-item" href="#s6" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><path d="M8 1.5C8 1.5 3 5 3 9.5C3 12.26 5.24 14.5 8 14.5S13 12.26 13 9.5C13 5 8 1.5 8 1.5Z"/><path d="M8 1.5C8 1.5 8 6 5 9"/></svg></span>
+    환경·편의
+  </a>
+  <a class="nav-item" href="#s7" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><rect x="1.5" y="1.5" width="6" height="6" rx="1"/><rect x="8.5" y="1.5" width="6" height="6" rx="1"/><rect x="1.5" y="8.5" width="6" height="6" rx="1"/><rect x="8.5" y="8.5" width="6" height="6" rx="1"/></svg></span>
+    테스트핏
+  </a>
+  <a class="nav-item" href="#s8" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14"/><path d="M3 5L1.5 10C1.5 11.66 3.07 13 5 13"/><path d="M13 5L14.5 10C14.5 11.66 12.93 13 11 13"/><line x1="3" y1="5" x2="13" y2="5"/></svg></span>
+    경쟁사 분석
+  </a>
+  <a class="nav-item" href="#s9" onclick="setActive(this)">
+    <span class="ni-icon"><svg viewBox="0 0 16 16"><rect x="2" y="3.5" width="12" height="11" rx="1.5"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="5.5" y1="2" x2="5.5" y2="5"/><line x1="10.5" y1="2" x2="10.5" y2="5"/><rect x="4.5" y="9.5" width="2" height="2" rx=".5"/><rect x="7.5" y="9.5" width="2" height="2" rx=".5"/><rect x="10.5" y="9.5" width="1" height="2" rx=".5"/></svg></span>
+    진행 일정
+  </a>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-client-box">
+      <div class="label">의뢰 기업</div>
+      <div class="name">SK네트웍스서비스</div>
+      <div class="sub">담당 PM: 젠스타메이트 강○○</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+<!-- S0: HERO -->
+<section id="s0" class="section">
+  <div class="hero-kicker">AI-Powered Office Relocation Report</div>
+  <div class="hero-title">SK네트웍스서비스<br><span>최적 오피스</span> 이전 분석</div>
+  <div class="hero-sub">AI가 9개 후보 물건을 분석하여 비용·접근성·공간효율을 종합 평가한 결과입니다.</div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="val">9개</div>
+      <div class="lbl">검토 물건 수</div>
+    </div>
+    <div class="hero-stat">
+      <div class="val">약 500평</div>
+      <div class="lbl">희망 전용 면적</div>
+    </div>
+    <div class="hero-stat">
+      <div class="val">2026.07</div>
+      <div class="lbl">목표 이전 시기</div>
+    </div>
+    <div class="hero-stat">
+      <div class="val">DMC 권역</div>
+      <div class="lbl">AI 추천 권역</div>
+    </div>
+  </div>
+
+  <div class="hero-top3-label">✦ AI TOP 3 추천 물건</div>
+  <div class="hero-top3" id="heroTop3"></div>
+</section>
+
+<!-- S1: CONDITIONS -->
+<section id="s1" class="section">
+  <div class="section-header">
+    <div class="section-tag">S1 · 이전 조건</div>
+    <div class="section-title">고객사 요구 조건</div>
+    <div class="section-subtitle">SK네트웍스서비스의 핵심 이전 요구사항</div>
+  </div>
+
+  <div class="cond-strip">
+    <div class="cond-item">
+      <div class="cond-label">희망 입지</div>
+      <div class="cond-value">상암 DMC</div>
+      <div class="cond-note">CBD 대비 비용 절감</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-label">전용 면적</div>
+      <div class="cond-value">약 500평</div>
+      <div class="cond-note">임직원 250명 기준</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-label">입주 희망일</div>
+      <div class="cond-value">2026년 7월</div>
+      <div class="cond-note">계약 협의 가능</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-label">ENOC 목표</div>
+      <div class="cond-value">~160,000원</div>
+      <div class="cond-note">현 임차료 대비 절감 목표</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">필수 시설 요건</div>
+    <ul class="req-list">
+      <li>전층 전용 가능</li>
+      <li>주차 1대/30평 이상</li>
+      <li>지하철 도보 10분 이내</li>
+      <li>리모델링 허용</li>
+      <li>비상발전기 구비</li>
+      <li>회의실 5개 이상 확보</li>
+      <li>식당/카페테리아 연결</li>
+      <li>층고 2.7m 이상</li>
+    </ul>
+  </div>
+</section>
+
+<!-- S2: MARKET -->
+<section id="s2" class="section">
+  <div class="section-header">
+    <div class="section-tag">S2 · 시장 현황</div>
+    <div class="section-title">오피스 시장 공실률 분석</div>
+    <div class="section-subtitle">2026년 1분기 권역별 공실률 (출처: 젠스타메이트 리서치)</div>
+  </div>
+
+  <div class="market-district-grid">
+    <div class="district-card">
+      <div class="d-name">CBD</div>
+      <div class="d-rate">5.1%</div>
+      <div class="d-change up">▲ 0.9%p</div>
+    </div>
+    <div class="district-card">
+      <div class="d-name">YBD</div>
+      <div class="d-rate">2.2%</div>
+      <div class="d-change down">▼ 1.3%p</div>
+    </div>
+    <div class="district-card">
+      <div class="d-name">GBD</div>
+      <div class="d-rate">3.9%</div>
+      <div class="d-change" style="color:var(--text-muted)">— 0.0%p</div>
+    </div>
+    <div class="district-card">
+      <div class="d-name">BBD</div>
+      <div class="d-rate">3.2%</div>
+      <div class="d-change up">▲ 1.2%p</div>
+    </div>
+    <div class="district-card highlight">
+      <div class="d-name">기타(DMC)</div>
+      <div class="d-rate">14.9%</div>
+      <div class="d-change up" style="color:var(--accent)">▲ 1.4%p</div>
+    </div>
+  </div>
+
+  <div class="market-grid">
+    <div class="card">
+      <div class="card-title">권역별 공실률 비교</div>
+      <div class="chart-wrap">
+        <canvas id="marketChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">CBD 임대료 추이 (원/평)</div>
+      <div class="chart-wrap">
+        <canvas id="rentChart"></canvas>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">2026 Q1 기준</div>
+        <div style="display:flex;gap:16px;">
+          <div><div style="font-size:10px;color:var(--text-light);font-weight:600;">임대료</div><div style="font-size:16px;font-weight:800;color:var(--primary)">113,000원<span style="font-size:11px;color:var(--text-muted)">/평</span></div></div>
+          <div><div style="font-size:10px;color:var(--text-light);font-weight:600;">관리비</div><div style="font-size:16px;font-weight:800;color:var(--primary)">45,600원<span style="font-size:11px;color:var(--text-muted)">/평</span></div></div>
+          <div><div style="font-size:10px;color:var(--text-light);font-weight:600;">YoY</div><div style="font-size:16px;font-weight:800;color:var(--red)">▲1.1%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S3: MAP -->
+<section id="s3" class="section">
+  <div class="section-header">
+    <div class="section-tag">S3 · 입지 지도</div>
+    <div class="section-title">후보 물건 위치</div>
+    <div class="section-subtitle">서울 권역별 오피스 빌딩 분포 (마커 클릭 시 상세 정보)</div>
+  </div>
+
+  <div class="map-layout">
+    <div class="map-container">
+      <div id="leafletMap"></div>
+      <div class="map-legend">
+        <div class="map-legend-item"><div class="legend-dot" style="background:#15803D"></div>DMC 물건</div>
+        <div class="map-legend-item"><div class="legend-dot" style="background:#1B3A5C"></div>CBD 물건</div>
+        <div class="map-legend-item"><span style="font-size:10px;color:var(--green);font-weight:700">●</span> ENOC ≤150K</div>
+        <div class="map-legend-item"><span style="font-size:10px;color:var(--amber);font-weight:700">●</span> 150K~200K</div>
+        <div class="map-legend-item"><span style="font-size:10px;color:var(--red);font-weight:700">●</span> ≥200K</div>
+        <div class="map-legend-item" style="margin-left:auto;font-size:10px;color:var(--text-light)">© OpenStreetMap contributors</div>
+      </div>
+    </div>
+
+    <div class="map-list" id="mapList"></div>
+  </div>
+</section>
+
+<!-- S4: BUILDINGS -->
+<section id="s4" class="section">
+  <div class="section-header">
+    <div class="section-tag">S4 · 물건 목록</div>
+    <div class="section-title">후보 물건 상세</div>
+    <div class="section-subtitle">건물 카드 클릭 시 비교 목록에 추가 (최대 4개)</div>
+  </div>
+  <div class="buildings-grid" id="buildingsGrid"></div>
+</section>
+
+<!-- S5: COST -->
+<section id="s5" class="section">
+  <div class="section-header">
+    <div class="section-tag">S5 · 비용 분석</div>
+    <div class="section-title">ENOC 비교 분석</div>
+    <div class="section-subtitle">Effective Net Occupancy Cost — 전용 면적 기준 실질 점유비용 (원/평/월)</div>
+  </div>
+
+  <div class="cost-layout">
+    <div class="card">
+      <div class="card-title">물건별 ENOC 비교</div>
+      <div class="enoc-chart-wrap">
+        <canvas id="enocChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">비용 상세 테이블</div>
+      <table class="cost-table" id="costTable"></table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <div class="card-title">💡 ENOC 산정 방식</div>
+    <div style="font-size:13px;color:var(--text-muted);line-height:1.8;">
+      ENOC(Effective Net Occupancy Cost) = <strong>(임대료 + 관리비) ÷ 전용률</strong><br>
+      계약면적 기준이 아닌 <strong>실사용 면적(전용면적)</strong>당 실질 비용을 나타내므로, 전용률이 낮을수록 ENOC가 높아집니다.<br>
+      동일 임대료라도 전용률 차이로 인한 실비용 차이를 직관적으로 비교할 수 있습니다.
+    </div>
+  </div>
+</section>
+
+<!-- S6: ENVIRONMENT -->
+<section id="s6" class="section">
+  <div class="section-header">
+    <div class="section-tag">S6 · 환경·편의</div>
+    <div class="section-title">주변 환경 및 편의시설</div>
+    <div class="section-subtitle">상암 DMC 권역 주요 인프라 현황</div>
+  </div>
+
+  <div class="env-grid">
+    <div class="env-card">
+      <div class="env-title">교통 접근성</div>
+      <div class="env-desc">디지털미디어시티역(6호선·공항철도·경의중앙선) 도보 5~10분. 서울역·여의도 직결. 공항철도로 인천공항 50분.</div>
+      <div class="env-score">
+        <div class="env-score-label"><span>접근성 점수</span><span style="font-weight:700;color:var(--primary)">88 / 100</span></div>
+        <div class="env-score-bar"><div class="env-score-fill" style="width:88%"></div></div>
+      </div>
+    </div>
+    <div class="env-card">
+      <div class="env-title">생활 편의</div>
+      <div class="env-desc">상암 월드컵경기장 인근 대형 쇼핑몰·마트 밀집. 상암사거리 식당가 500m 이내. 카페·편의점 다수.</div>
+      <div class="env-score">
+        <div class="env-score-label"><span>편의 점수</span><span style="font-weight:700;color:var(--primary)">82 / 100</span></div>
+        <div class="env-score-bar"><div class="env-score-fill" style="width:82%"></div></div>
+      </div>
+    </div>
+    <div class="env-card">
+      <div class="env-title">인근 개발 호재</div>
+      <div class="env-desc">GTX-A 연신내 연결(2026), 상암2지구 개발 계획, MBC·JTBC 등 미디어 클러스터 확장. 권역 가치 상승 전망.</div>
+      <div class="env-score">
+        <div class="env-score-label"><span>성장 잠재력</span><span style="font-weight:700;color:var(--primary)">91 / 100</span></div>
+        <div class="env-score-bar"><div class="env-score-fill" style="width:91%"></div></div>
+      </div>
+    </div>
+    <div class="env-card">
+      <div class="env-title">주차 환경</div>
+      <div class="env-desc">DMC 권역 내 빌딩 평균 주차 비율 1대/25평. CBD(1대/60평) 대비 2배 이상 여유. 상암전자회관 1대/20평.</div>
+      <div class="env-score">
+        <div class="env-score-label"><span>주차 편의</span><span style="font-weight:700;color:var(--primary)">76 / 100</span></div>
+        <div class="env-score-bar"><div class="env-score-fill" style="width:76%"></div></div>
+      </div>
+    </div>
+    <div class="env-card">
+      <div class="env-title">녹지 및 공원</div>
+      <div class="env-desc">하늘공원·노을공원 도보 15분. 난지한강공원 인접. 상암 DMC 내 조경 광장. CBD 대비 우수한 녹지 환경.</div>
+      <div class="env-score">
+        <div class="env-score-label"><span>쾌적성</span><span style="font-weight:700;color:var(--primary)">85 / 100</span></div>
+        <div class="env-score-bar"><div class="env-score-fill" style="width:85%"></div></div>
+      </div>
+    </div>
+    <div class="env-card">
+      <div class="env-title">ESG · 에너지</div>
+      <div class="env-desc">DMC 권역 신축 빌딩 에너지효율 1등급 다수. 녹색건축 인증(G-SEED) 적용. ESG 경영 목표 부합.</div>
+      <div class="env-score">
+        <div class="env-score-label"><span>ESG 적합도</span><span style="font-weight:700;color:var(--primary)">79 / 100</span></div>
+        <div class="env-score-bar"><div class="env-score-fill" style="width:79%"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S7: TEST-FIT -->
+<section id="s7" class="section">
+  <div class="section-header">
+    <div class="section-tag">S7 · 테스트핏</div>
+    <div class="section-title">성암빌딩 레이아웃 시뮬레이션</div>
+    <div class="section-subtitle">10~13F 공간 배치안 (DK 189석, 쇼룸·대표실·라운지 포함)</div>
+  </div>
+
+  <div class="testfit-layout">
+    <div>
+      <div class="floor-tabs">
+        <button class="floor-tab active" onclick="switchFloor(this, 'office')">10~12F 오피스</button>
+        <button class="floor-tab" onclick="switchFloor(this, 'top')">13F 특화층</button>
+      </div>
+      <div class="floorplan-container">
+        <svg id="floorplanSvg" viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg">
+          <!-- Floor plan will be drawn by JS -->
+        </svg>
+        <div class="room-legend" id="roomLegend"></div>
+      </div>
+    </div>
+
+    <div class="generate-panel">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px;">AI 레이아웃 생성</div>
+
+        <!-- 인원수 -->
+        <div class="setting-row">
+          <label>인원 수 &nbsp;<span class="range-val" id="headcountVal">250명</span></label>
+          <input type="range" min="100" max="400" value="250" oninput="document.getElementById('headcountVal').textContent=this.value+'명'">
+        </div>
+
+        <!-- 업무 유형 -->
+        <div class="setting-row">
+          <label>업무 유형</label>
+          <select>
+            <option>집중 업무형 (DK 중심)</option>
+            <option>협업 중심형 (회의실 강화)</option>
+            <option>하이브리드형</option>
+          </select>
+        </div>
+
+        <!-- 공간 구성 steppers -->
+        <div class="panel-sep">공간 구성 설정</div>
+
+        <div class="stepper-row">
+          <div style="flex:1">
+            <span class="s-label">소회의실</span>
+            <span style="font-size:10px;color:var(--text-light);margin-left:5px">5.9py/실</span>
+          </div>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="stepChange('spSmRoom',-1,1)">−</button>
+            <span class="stepper-val" id="spSmRoom">3</span>
+            <button class="stepper-btn" onclick="stepChange('spSmRoom',1,6)">+</button>
+          </div>
+        </div>
+
+        <div class="stepper-row">
+          <div style="flex:1">
+            <span class="s-label">탕비실</span>
+            <span style="font-size:10px;color:var(--text-light);margin-left:5px">4py/실</span>
+          </div>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="stepChange('spPantry',-1,1)">−</button>
+            <span class="stepper-val" id="spPantry">3</span>
+            <button class="stepper-btn" onclick="stepChange('spPantry',1,4)">+</button>
+          </div>
+        </div>
+
+        <div class="stepper-row">
+          <div style="flex:1">
+            <span class="s-label">프라이빗 오피스</span>
+            <span style="font-size:10px;color:var(--text-light);margin-left:5px">4.4py/실</span>
+          </div>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="stepChange('spPrivate',-1,0)">−</button>
+            <span class="stepper-val" id="spPrivate">3</span>
+            <button class="stepper-btn" onclick="stepChange('spPrivate',1,4)">+</button>
+          </div>
+        </div>
+
+        <div class="stepper-row">
+          <div style="flex:1">
+            <span class="s-label">대회의실</span>
+            <span style="font-size:10px;color:var(--text-light);margin-left:5px">12py/실</span>
+          </div>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="stepChange('spLgRoom',-1,0)">−</button>
+            <span class="stepper-val" id="spLgRoom">1</span>
+            <button class="stepper-btn" onclick="stepChange('spLgRoom',1,3)">+</button>
+          </div>
+        </div>
+
+        <!-- 13F 특화 공간 -->
+        <div class="panel-sep">13F 특화 공간</div>
+        <div class="option-checks">
+          <div class="opt-check on" onclick="this.classList.toggle('on')">
+            <div class="oc-box"></div>
+            <span class="oc-lbl">쇼룸<br><span style="font-size:10px;font-weight:400">60py</span></span>
+          </div>
+          <div class="opt-check on" onclick="this.classList.toggle('on')">
+            <div class="oc-box"></div>
+            <span class="oc-lbl">대표실<br><span style="font-size:10px;font-weight:400">20py</span></span>
+          </div>
+          <div class="opt-check on" onclick="this.classList.toggle('on')">
+            <div class="oc-box"></div>
+            <span class="oc-lbl">라운지<br><span style="font-size:10px;font-weight:400">22py</span></span>
+          </div>
+          <div class="opt-check" onclick="this.classList.toggle('on')">
+            <div class="oc-box"></div>
+            <span class="oc-lbl">창고<br><span style="font-size:10px;font-weight:400">4py</span></span>
+          </div>
+        </div>
+
+        <button class="generate-btn" id="generateBtn" onclick="runGenerate()" style="margin-top:16px;">
+          <span class="spinner" id="genSpinner"></span>
+          <span id="generateBtnText">AI 레이아웃 생성</span>
+        </button>
+
+        <div class="stats-summary" style="margin-top:14px;">
+          <div class="stat-box">
+            <div class="s-val" id="statSeats">189</div>
+            <div class="s-lbl">DK 좌석 수</div>
+          </div>
+          <div class="stat-box">
+            <div class="s-val">3</div>
+            <div class="s-lbl">배치 층수</div>
+          </div>
+          <div class="stat-box">
+            <div class="s-val" id="statMeeting">8</div>
+            <div class="s-lbl">회의실 수</div>
+          </div>
+          <div class="stat-box">
+            <div class="s-val" id="statEff">92%</div>
+            <div class="s-lbl">공간 효율</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S8: COMPETITORS -->
+<section id="s8" class="section">
+  <div class="section-header">
+    <div class="section-tag">S8 · 경쟁사 분석</div>
+    <div class="section-title">유사 조건 임차 사례 분석</div>
+    <div class="section-subtitle">동 권역 유사 규모 임차사 레이더 비교</div>
+  </div>
+
+  <div class="radar-layout">
+    <div class="card">
+      <div class="card-title">경쟁사 vs SK네트웍스서비스 비교</div>
+      <div class="radar-wrap">
+        <canvas id="radarChart"></canvas>
+      </div>
+    </div>
+    <div>
+      <div class="competitor-list" id="competitorList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- S9: SCHEDULE -->
+<section id="s9" class="section">
+  <div class="section-header">
+    <div class="section-tag">S9 · 진행 일정</div>
+    <div class="section-title">이전 추진 타임라인</div>
+    <div class="section-subtitle">2026년 2월 — 7월 이전 완료 목표</div>
+  </div>
+
+  <div class="grid-2" style="align-items:start;">
+    <div class="timeline" id="timeline"></div>
+    <div class="card">
+      <div class="card-title">현재 진행 단계</div>
+      <div style="text-align:center;padding:24px 0;">
+        <div style="font-size:48px;font-weight:900;color:var(--accent)">2단계</div>
+        <div style="font-size:16px;color:var(--primary);font-weight:700;margin:8px 0 4px">물건 제안 및 검토</div>
+        <div style="font-size:13px;color:var(--text-muted)">9개 후보 물건 상세 분석 완료<br>의사결정권자 보고 준비 중</div>
+        <div style="margin:24px 0 12px;height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+          <div style="width:33%;height:100%;background:linear-gradient(90deg,var(--secondary),var(--accent));border-radius:4px;"></div>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted)">전체 6단계 중 2단계 완료</div>
+      </div>
+      <div style="padding-top:16px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:10px;">다음 Action Items</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span style="color:var(--accent)">→</span>
+            <span>선호 물건 3개 내외 숏리스트 확정</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span style="color:var(--accent)">→</span>
+            <span>현장 실사 일정 조율</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span style="color:var(--accent)">→</span>
+            <span>임대인 조건 협의 개시</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- COMPARE BAR -->
+<div id="compareBar">
+  <div class="compare-label">비교 목록</div>
+  <div class="compare-items" id="compareItems"></div>
+  <button class="compare-action-btn" onclick="openCompareModal()">상세 비교하기</button>
+  <button class="compare-clear" onclick="clearCompare()">전체 해제</button>
+</div>
+
+<!-- COMPARE MODAL -->
+<div class="modal-overlay" id="compareModal" onclick="if(event.target===this)closeCompareModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">물건 상세 비교</div>
+      <button class="modal-close" onclick="closeCompareModal()">×</button>
+    </div>
+    <div id="compareModalContent"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+const BUILDINGS = [
+  { id:0, name:'상암전자회관', district:'DMC', rank:'AI 추천 1위',
+    rent:38500, mgmt:28500, ratio:49.44, floor:'지하2~지상7층', area:'3,300평', year:2001,
+    parking:'1대/20평', subway:'DMC역 5분', grade:'A급',
+    color:'#15803D', gradient:'linear-gradient(135deg,#166534,#15803D)',
+    bgPhoto:'linear-gradient(135deg,rgba(22,101,52,0.60),rgba(21,128,61,0.72)), url(https://loremflickr.com/600/200/office,building,city?lock=11) center/cover no-repeat',
+    lat:37.5756, lng:126.8898, reason:'최저 ENOC — 비용 최적화 최우선 선택' },
+  { id:1, name:'상암IT타워', district:'DMC', rank:'AI 추천 2위',
+    rent:50000, mgmt:32000, ratio:54.70, floor:'지하3~지상21층', area:'10,000평', year:2009,
+    parking:'1대/28평', subway:'DMC역 8분', grade:'A급',
+    color:'#16A34A', gradient:'linear-gradient(135deg,#15803D,#22C55E)',
+    bgPhoto:'linear-gradient(135deg,rgba(21,128,61,0.60),rgba(34,197,94,0.72)), url(https://loremflickr.com/600/200/skyscraper,glass,facade?lock=22) center/cover no-repeat',
+    lat:37.5769, lng:126.8921, reason:'IT인프라 완비, 대형 임차 가능' },
+  { id:2, name:'S-CITY', district:'DMC', rank:'AI 추천 3위',
+    rent:60000, mgmt:30000, ratio:54.65, floor:'지하4~지상22층', area:'8,500평', year:2012,
+    parking:'1대/30평', subway:'DMC역 10분', grade:'A+급',
+    color:'#0EA5E9', gradient:'linear-gradient(135deg,#0284C7,#0EA5E9)',
+    bgPhoto:'linear-gradient(135deg,rgba(2,132,199,0.60),rgba(14,165,233,0.72)), url(https://loremflickr.com/600/200/highrise,building,urban?lock=33) center/cover no-repeat',
+    lat:37.5779, lng:126.8909, reason:'신축급 시설, 비용 합리적' },
+  { id:3, name:'한샘상암사옥', district:'DMC', rank:null,
+    rent:63000, mgmt:35000, ratio:53.42, floor:'지하2~지상11층', area:'4,200평', year:2014,
+    parking:'1대/25평', subway:'DMC역 7분', grade:'A급',
+    color:'#6366F1', gradient:'linear-gradient(135deg,#4F46E5,#6366F1)',
+    bgPhoto:'linear-gradient(135deg,rgba(79,70,229,0.60),rgba(99,102,241,0.72)), url(https://loremflickr.com/600/200/corporate,office,tower?lock=44) center/cover no-repeat',
+    lat:37.5741, lng:126.8882, reason:'안정적 관리, 중소규모 적합' },
+  { id:4, name:'용산 더프라임타워', district:'CBD', rank:null,
+    rent:120000, mgmt:40000, ratio:62.03, floor:'지하5~지상20층', area:'6,800평', year:2018,
+    parking:'1대/45평', subway:'용산역 3분', grade:'S급',
+    color:'#1D4ED8', gradient:'linear-gradient(135deg,#1E3A8A,#1D4ED8)',
+    bgPhoto:'linear-gradient(135deg,rgba(30,58,138,0.60),rgba(29,78,216,0.72)), url(https://loremflickr.com/600/200/skyscraper,tower,architecture?lock=55) center/cover no-repeat',
+    lat:37.5297, lng:126.9648, reason:'용산 랜드마크, 접근성 최우수' },
+  { id:5, name:'ENA센터', district:'CBD', rank:null,
+    rent:75000, mgmt:38000, ratio:55.27, floor:'지하4~지상18층', area:'5,500평', year:2010,
+    parking:'1대/55평', subway:'을지로입구역 5분', grade:'A급',
+    color:'#2563EB', gradient:'linear-gradient(135deg,#1D4ED8,#3B82F6)',
+    bgPhoto:'linear-gradient(135deg,rgba(29,78,216,0.60),rgba(59,130,246,0.72)), url(https://loremflickr.com/600/200/office,glass,building?lock=66) center/cover no-repeat',
+    lat:37.5658, lng:126.9843, reason:'CBD 중심 접근, 상대적 저렴' },
+  { id:6, name:'씨티센터타워', district:'CBD', rank:null,
+    rent:130000, mgmt:47000, ratio:72.25, floor:'지하6~지상26층', area:'12,000평', year:2016,
+    parking:'1대/60평', subway:'시청역 2분', grade:'S급',
+    color:'#7C3AED', gradient:'linear-gradient(135deg,#6D28D9,#7C3AED)',
+    bgPhoto:'linear-gradient(135deg,rgba(109,40,217,0.60),rgba(124,58,237,0.72)), url(https://loremflickr.com/600/200/downtown,cityscape,building?lock=77) center/cover no-repeat',
+    lat:37.5641, lng:126.9759, reason:'시청역 초역세권 프라임 오피스' },
+  { id:7, name:'교원명동빌딩', district:'CBD', rank:null,
+    rent:105000, mgmt:47000, ratio:54.24, floor:'지하3~지상14층', area:'3,800평', year:2005,
+    parking:'1대/70평', subway:'명동역 4분', grade:'A급',
+    color:'#DC2626', gradient:'linear-gradient(135deg,#B91C1C,#DC2626)',
+    bgPhoto:'linear-gradient(135deg,rgba(185,28,28,0.60),rgba(220,38,38,0.72)), url(https://loremflickr.com/600/200/commercial,building,urban?lock=88) center/cover no-repeat',
+    lat:37.5603, lng:126.9826, reason:'명동 상권, 고객 접점 우수' },
+  { id:8, name:'TOWER50', district:'CBD', rank:null,
+    rent:119000, mgmt:41000, ratio:56.96, floor:'지하5~지상50층', area:'22,000평', year:2020,
+    parking:'1대/50평', subway:'광화문역 6분', grade:'S급',
+    color:'#0891B2', gradient:'linear-gradient(135deg,#0E7490,#06B6D4)',
+    bgPhoto:'linear-gradient(135deg,rgba(14,116,144,0.60),rgba(6,182,212,0.72)), url(https://loremflickr.com/600/200/tower,modern,architecture?lock=99) center/cover no-repeat',
+    lat:37.5720, lng:126.9768, reason:'광화문 초대형 프리미엄 오피스' },
+];
+
+function calcEnoc(b) { return Math.round((b.rent + b.mgmt) / (b.ratio/100)); }
+BUILDINGS.forEach(b => b.enoc = calcEnoc(b));
+
+const enocColor = enoc => enoc <= 150000 ? 'green' : enoc <= 200000 ? 'amber' : 'red';
+const enocBadgeClass = enoc => 'enoc-' + enocColor(enoc);
+const fmt = n => n.toLocaleString();
+
+// ── SELECTED (compare) ─────────────────────────────────────────────
+let selected = new Set();
+
+// ── HERO TOP 3 ─────────────────────────────────────────────────────
+(function renderHeroTop3() {
+  const top3 = BUILDINGS.slice(0,3);
+  const badges = ['badge-green','badge-green','badge-green'];
+  const el = document.getElementById('heroTop3');
+  el.innerHTML = top3.map((b,i) => `
+    <div class="hero-top3-card">
+      <div class="rank">${i+1}</div>
+      <div class="building-name">${b.name}</div>
+      <span class="district-tag ${b.district==='DMC'?'badge-green':'badge-blue'}">${b.district}</span>
+      <div class="enoc-val">${fmt(b.enoc)}</div>
+      <div class="enoc-lbl">원/평 ENOC</div>
+      <div class="reason">${b.reason}</div>
+    </div>
+  `).join('');
+})();
+
+// ── LEAFLET MAP ────────────────────────────────────────────────────
+let leafletMap, leafletMarkers = [];
+(function renderMap() {
+  leafletMap = L.map('leafletMap', {
+    center: [37.555, 126.933],
+    zoom: 12,
+    zoomControl: true,
+    scrollWheelZoom: true
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: ''
+  }).addTo(leafletMap);
+
+  const listEl = document.getElementById('mapList');
+
+  BUILDINGS.forEach((b, i) => {
+    const ec = enocColor(b.enoc);
+    const ringColor = ec==='green'?'#10B981': ec==='amber'?'#F59E0B':'#EF4444';
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="
+        position:relative;width:36px;height:36px;
+        border-radius:50%;background:${b.color};
+        border:3px solid #fff;
+        box-shadow:0 2px 10px rgba(0,0,0,.35),0 0 0 3px ${ringColor};
+        display:flex;align-items:center;justify-content:center;
+        font-size:12px;font-weight:900;color:#fff;
+        font-family:Pretendard,-apple-system,sans-serif;
+        cursor:pointer;transition:transform .15s;
+      ">${i+1}</div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+      popupAnchor: [0, -22]
+    });
+
+    const popupHtml = `
+      <div style="font-family:Pretendard,-apple-system,sans-serif;padding:14px 16px;min-width:220px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:${b.color};flex-shrink:0"></div>
+          <div style="font-size:15px;font-weight:800;color:#1B3A5C;line-height:1.2">${b.name}</div>
+          <span style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:${b.district==='DMC'?'#DCFCE7':'#DBEAFE'};color:${b.district==='DMC'?'#15803D':'#1D4ED8'};white-space:nowrap">${b.district}</span>
+        </div>
+        <div style="font-size:18px;font-weight:800;color:${ringColor};margin-bottom:2px">ENOC ${fmt(b.enoc)}<span style="font-size:11px;font-weight:500;color:#94A3B8"> 원/평</span></div>
+        <div style="font-size:11px;color:#64748B;margin-bottom:10px">${b.floor} · ${b.grade} · ${b.year}년</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;background:#F8FAFC;border-radius:8px;margin-bottom:10px;">
+          <div><div style="font-size:9px;color:#94A3B8;font-weight:600;text-transform:uppercase">임대료</div><div style="font-size:13px;font-weight:700;color:#1A202C">${fmt(b.rent)}</div></div>
+          <div><div style="font-size:9px;color:#94A3B8;font-weight:600;text-transform:uppercase">관리비</div><div style="font-size:13px;font-weight:700;color:#1A202C">${fmt(b.mgmt)}</div></div>
+          <div><div style="font-size:9px;color:#94A3B8;font-weight:600;text-transform:uppercase">전용률</div><div style="font-size:13px;font-weight:700;color:#1A202C">${b.ratio}%</div></div>
+          <div><div style="font-size:9px;color:#94A3B8;font-weight:600;text-transform:uppercase">주차</div><div style="font-size:13px;font-weight:700;color:#1A202C">${b.parking}</div></div>
+        </div>
+        <div style="font-size:12px;color:#64748B">🚇 ${b.subway}</div>
+        ${b.rank ? `<div style="margin-top:8px;font-size:11px;font-weight:700;color:#00A3E0;background:#E8F6FC;padding:4px 10px;border-radius:20px;display:inline-block">✦ ${b.rank}</div>` : ''}
+      </div>`;
+
+    const marker = L.marker([b.lat, b.lng], { icon })
+      .addTo(leafletMap)
+      .bindPopup(popupHtml, { maxWidth: 260, className: 'custom-popup' });
+
+    marker.on('click', () => {
+      highlightBuilding(i);
+      marker.openPopup();
+    });
+    leafletMarkers.push(marker);
+
+    // side list
+    const item = document.createElement('div');
+    item.className = 'map-list-item';
+    item.dataset.id = i;
+    item.innerHTML = `
+      <div class="map-pin-num" style="background:${b.color}">${i+1}</div>
+      <div class="item-info">
+        <div class="item-name">${b.name}</div>
+        <div class="item-district">${b.district}</div>
+      </div>
+      <div class="item-enoc ${enocBadgeClass(b.enoc)}" style="font-weight:700;font-size:12px;">${fmt(b.enoc)}</div>
+    `;
+    item.addEventListener('click', () => {
+      leafletMap.setView([b.lat, b.lng], 15, { animate: true });
+      setTimeout(() => leafletMarkers[i].openPopup(), 400);
+      highlightBuilding(i);
+    });
+    listEl.appendChild(item);
+  });
+  // Ensure Leaflet re-renders correctly after layout
+  setTimeout(() => leafletMap.invalidateSize(), 100);
+})();
+
+function highlightBuilding(idx) {
+  document.querySelectorAll('.map-list-item').forEach((el, i) => {
+    el.classList.toggle('highlighted', i === idx);
+  });
+}
+
+// ── BUILDING CARDS ─────────────────────────────────────────────────
+(function renderBuildings() {
+  const grid = document.getElementById('buildingsGrid');
+  grid.innerHTML = BUILDINGS.map((b,i) => {
+    const ec = enocColor(b.enoc);
+    const ecClass = 'enoc-'+ec;
+    return `
+    <div class="bldg-card" data-bldg="${i}" onclick="toggleCompare(${i})">
+      <div class="bldg-photo">
+        <div class="bldg-photo-img" style="background:${b.bgPhoto}"></div>
+        <div class="bldg-photo-overlay"></div>
+        <div class="bldg-photo-name">${b.name}</div>
+        ${b.rank?`<div class="rank-badge">${b.rank}</div>`:''}
+        <div class="compare-btn" title="비교 추가">+</div>
+      </div>
+      <div class="bldg-body">
+        <div class="bldg-header">
+          <div class="bldg-name">${b.name}</div>
+          <span class="bldg-district-tag ${b.district==='DMC'?'tag-dmc':'tag-cbd'}">${b.district}</span>
+        </div>
+        <div>
+          <span class="enoc-label-sm">ENOC (원/평/월)</span>
+          <div class="enoc-row">
+            <span class="enoc-num ${ecClass}">${fmt(b.enoc)}</span>
+            <span class="enoc-unit">원/평</span>
+          </div>
+        </div>
+        <div class="bldg-specs">
+          <div class="spec-item"><div class="spec-lbl">임대료</div><div class="spec-val">${fmt(b.rent)}원</div></div>
+          <div class="spec-item"><div class="spec-lbl">관리비</div><div class="spec-val">${fmt(b.mgmt)}원</div></div>
+          <div class="spec-item"><div class="spec-lbl">전용률</div><div class="spec-val">${b.ratio}%</div></div>
+          <div class="spec-item"><div class="spec-lbl">건축연도</div><div class="spec-val">${b.year}년</div></div>
+        </div>
+      </div>
+      <div class="bldg-footer">
+        <span style="font-size:12px;color:var(--text-muted)">${b.subway}</span>
+        <span class="detail-link">상세보기 →</span>
+      </div>
+    </div>`;
+  }).join('');
+})();
+
+// ── COMPARE LOGIC ──────────────────────────────────────────────────
+function toggleCompare(idx) {
+  if(selected.has(idx)) {
+    selected.delete(idx);
+  } else {
+    if(selected.size >= 4) return;
+    selected.add(idx);
+  }
+  document.querySelectorAll('.bldg-card').forEach((el,i) => {
+    el.classList.toggle('selected', selected.has(i));
+  });
+  renderCompareBar();
+}
+
+function renderCompareBar() {
+  const bar = document.getElementById('compareBar');
+  const items = document.getElementById('compareItems');
+  if(selected.size < 2) { bar.classList.remove('visible'); return; }
+  bar.classList.add('visible');
+  const slots = [];
+  selected.forEach(idx => {
+    const b = BUILDINGS[idx];
+    slots.push(`<div class="compare-chip"><span>${b.name}</span><span class="chip-remove" onclick="event.stopPropagation();toggleCompare(${idx})">×</span></div>`);
+  });
+  for(let i=selected.size; i<4; i++) slots.push(`<div class="compare-chip-placeholder">+ 추가</div>`);
+  items.innerHTML = slots.join('');
+}
+
+function clearCompare() {
+  selected.clear();
+  document.querySelectorAll('.bldg-card').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('compareBar').classList.remove('visible');
+}
+
+function openCompareModal() {
+  if(selected.size < 2) return;
+  const sel = [...selected].map(i=>BUILDINGS[i]);
+  const fields = [
+    {lbl:'ENOC (원/평)', fn: b=>fmt(b.enoc), best:'min'},
+    {lbl:'임대료 (원/평)', fn: b=>fmt(b.rent), best:'min'},
+    {lbl:'관리비 (원/평)', fn: b=>fmt(b.mgmt), best:'min'},
+    {lbl:'전용률', fn: b=>b.ratio+'%', best:'max'},
+    {lbl:'건축연도', fn: b=>b.year+'년', best:'max'},
+    {lbl:'주차', fn: b=>b.parking, best:''},
+    {lbl:'지하철', fn: b=>b.subway, best:''},
+    {lbl:'등급', fn: b=>b.grade, best:''},
+  ];
+  let html = `<table class="compare-table"><thead><tr><th>항목</th>${sel.map(b=>`<th>${b.name}</th>`).join('')}</tr></thead><tbody>`;
+  fields.forEach(f=>{
+    const vals = sel.map(b=>f.fn(b));
+    let bestIdx = -1;
+    if(f.best==='min') bestIdx = vals.reduce((bi,v,i)=>parseFloat(v.replace(/,/g,''))<parseFloat(vals[bi].replace(/,/g,''))?i:bi,0);
+    if(f.best==='max') bestIdx = vals.reduce((bi,v,i)=>parseFloat(v.replace(/[^0-9.]/g,''))>parseFloat(vals[bi].replace(/[^0-9.]/g,''))?i:bi,0);
+    html += `<tr><td style="font-weight:600;color:var(--text-muted)">${f.lbl}</td>${vals.map((v,i)=>`<td class="${i===bestIdx?'best':''}">${v}</td>`).join('')}</tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('compareModalContent').innerHTML = html;
+  document.getElementById('compareModal').classList.add('open');
+}
+
+function closeCompareModal() {
+  document.getElementById('compareModal').classList.remove('open');
+}
+
+// ── COST TABLE ─────────────────────────────────────────────────────
+(function renderCostTable() {
+  const t = document.getElementById('costTable');
+  t.innerHTML = `<thead><tr><th>#</th><th>빌딩</th><th>구역</th><th>임대료</th><th>관리비</th><th>전용률</th><th>ENOC</th></tr></thead>`;
+  const sorted = [...BUILDINGS].sort((a,b)=>a.enoc-b.enoc);
+  t.innerHTML += `<tbody>${sorted.map((b,i)=>{
+    const ec=enocColor(b.enoc);
+    const clr=ec==='green'?'var(--green)':ec==='amber'?'var(--amber)':'var(--red)';
+    return `<tr><td style="color:var(--text-muted)">${i+1}</td><td style="font-weight:600">${b.name}</td>
+      <td><span class="bldg-district-tag ${b.district==='DMC'?'tag-dmc':'tag-cbd'}" style="font-size:11px">${b.district}</span></td>
+      <td>${fmt(b.rent)}</td><td>${fmt(b.mgmt)}</td><td>${b.ratio}%</td>
+      <td class="enoc-cell" style="color:${clr}">${fmt(b.enoc)}</td></tr>`;
+  }).join('')}</tbody>`;
+})();
+
+// ── CHARTS ────────────────────────────────────────────────────────
+Chart.defaults.font.family = 'Pretendard, sans-serif';
+
+// Market chart
+new Chart(document.getElementById('marketChart'), {
+  type: 'bar',
+  data: {
+    labels: ['CBD','YBD','GBD','BBD','DMC(기타)'],
+    datasets: [{
+      label: '공실률(%)',
+      data: [5.1, 2.2, 3.9, 3.2, 14.9],
+      backgroundColor: ['rgba(59,130,246,.75)','rgba(16,185,129,.75)','rgba(139,92,246,.75)','rgba(245,158,11,.75)','rgba(255,107,53,.9)'],
+      borderColor: ['#3B82F6','#10B981','#8B5CF6','#F59E0B','#FF6B35'],
+      borderWidth: 0, borderRadius: 8,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ' ' + ctx.raw + '%' } }
+    },
+    animation: {
+      duration: 900,
+      easing: 'easeOutQuart',
+      delay: ctx => ctx.type === 'data' ? ctx.dataIndex * 110 : 0
+    },
+    scales: {
+      y: { beginAtZero: true, max: 18, grid: { color: '#EEF2F7' },
+        ticks: { callback: v=>v+'%', font:{size:11} } },
+      x: { grid: { display: false }, ticks: { font:{size:11} } }
+    }
+  }
+});
+
+// Rent trend chart
+(function(){
+  const rentCtx = document.getElementById('rentChart');
+  const rentGrad = rentCtx.getContext('2d').createLinearGradient(0, 0, 0, 200);
+  rentGrad.addColorStop(0, 'rgba(255,107,53,.35)');
+  rentGrad.addColorStop(1, 'rgba(255,107,53,.03)');
+  new Chart(rentCtx, {
+    type: 'line',
+    data: {
+      labels: ['24Q1','24Q2','24Q3','24Q4','25Q1','25Q2','25Q3','25Q4','26Q1'],
+      datasets: [{
+        label: '임대료',
+        data: [103000,104500,105000,106000,108000,109500,111000,112000,113000],
+        borderColor: '#FF6B35', backgroundColor: rentGrad,
+        tension: .45, fill: true, borderWidth: 2.5,
+        pointBackgroundColor: '#FF6B35', pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 4,
+        pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + (ctx.raw/1000).toFixed(1) + 'K원/평' } }
+      },
+      animations: {
+        x: { type:'number', easing:'linear', duration: 150, from: NaN, delay: ctx => ctx.index * 120 },
+        y: { type:'number', easing:'linear', duration: 150, from: NaN, delay: ctx => ctx.index * 120 }
+      },
+      scales: {
+        y: { grid: { color: '#EEF2F7' }, ticks: { callback: v=>(v/1000)+'K', font:{size:10} } },
+        x: { grid: { display: false }, ticks: { font:{size:10} } }
+      }
+    }
+  });
+})();
+
+// ENOC Chart
+const sorted4chart = [...BUILDINGS].sort((a,b)=>a.enoc-b.enoc);
+new Chart(document.getElementById('enocChart'), {
+  type: 'bar',
+  data: {
+    labels: sorted4chart.map(b=>b.name.length>5?b.name.slice(0,5)+'…':b.name),
+    datasets: [{
+      label: 'ENOC (원/평)',
+      data: sorted4chart.map(b=>b.enoc),
+      backgroundColor: sorted4chart.map(b=>{
+        const c=enocColor(b.enoc);
+        return c==='green'?'rgba(16,185,129,.82)':c==='amber'?'rgba(245,158,11,.82)':'rgba(239,68,68,.82)';
+      }),
+      borderColor: sorted4chart.map(b=>{
+        const c=enocColor(b.enoc);
+        return c==='green'?'#059669':c==='amber'?'#D97706':'#DC2626';
+      }),
+      borderWidth: 0, borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx=>' '+fmt(ctx.raw)+'원/평' } }
+    },
+    animation: {
+      duration: 800,
+      easing: 'easeOutCubic',
+      delay: ctx => ctx.type === 'data' ? ctx.dataIndex * 80 : 0
+    },
+    scales: {
+      x: { grid: { color: '#EEF2F7' }, ticks: { callback: v=>(v/1000)+'K', font:{size:10} } },
+      y: { grid: { display: false }, ticks: { font:{size:11} } }
+    }
+  }
+});
+
+// Radar Chart
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['비용 효율','접근성','주차','시설 등급','면적 유연성','ESG'],
+    datasets: [
+      { label: 'SK네트웍스서비스(목표)',
+        data: [85, 80, 88, 75, 82, 78],
+        borderColor: '#FF6B35', backgroundColor: 'rgba(255,107,53,.18)',
+        borderWidth: 2.5, pointBackgroundColor: '#FF6B35', pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 5 },
+      { label: '동종 평균',
+        data: [65, 72, 60, 78, 70, 68],
+        borderColor: '#94A3B8', backgroundColor: 'rgba(148,163,184,.12)',
+        borderWidth: 1.5, pointBackgroundColor: '#94A3B8', pointRadius: 3 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    animation: { duration: 1200, easing: 'easeInOutQuart' },
+    plugins: { legend: { position: 'bottom', labels: { font:{size:11}, padding: 16, usePointStyle: true } } },
+    scales: { r: { min: 0, max: 100, ticks: { stepSize: 25, font:{size:9}, backdropColor: 'transparent' }, grid: { color:'#E8ECF2' }, pointLabels: { font:{size:11} } } }
+  }
+});
+
+// ── COMPETITOR LIST ────────────────────────────────────────────────
+const competitors = [
+  { name: 'LG CNS', score: 88, note: 'GBD 이전, 신축 A+급', color: '#EF4444' },
+  { name: 'SK C&C', score: 84, note: 'CBD 잔류, 비용 절감 검토 중', color: '#F59E0B' },
+  { name: 'KT DS', score: 79, note: 'DMC 이전 협의 중', color: '#10B981' },
+  { name: '삼성SDS', score: 92, note: '수원 본사 + 서울 위성 분산', color: '#6366F1' },
+];
+const cl = document.getElementById('competitorList');
+cl.innerHTML = competitors.map((c,i)=>`
+  <div class="competitor-item">
+    <div class="competitor-rank" style="color:${['#FFD700','#C0C0C0','#CD7F32','#A0AEC0'][i]}">${['①','②','③','④'][i]}</div>
+    <div style="flex:1">
+      <div class="competitor-name">${c.name}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${c.note}</div>
+    </div>
+    <div style="width:100px">
+      <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:4px">${c.score}점</div>
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:${c.score}%;background:${c.color}"></div></div>
+    </div>
+  </div>`).join('');
+
+// ── TIMELINE ──────────────────────────────────────────────────────
+const TIMELINE = [
+  { month:'2026.02', title:'물건 제안 및 AI 분석 완료', desc:'9개 후보 물건 ENOC 산정 및 리포트 작성', tags:['완료','보고서 제출'], status:'done' },
+  { month:'2026.03', title:'숏리스트 확정 (3개 이내)', desc:'의사결정권자 보고 및 우선 검토 물건 선정', tags:['진행 중'], status:'active' },
+  { month:'2026.04', title:'현장 실사 및 조건 협의', desc:'임대인 미팅, 추가 조건 협의, 계약 조건 검토', tags:['예정'], status:'todo' },
+  { month:'2026.05', title:'계약 체결', desc:'선택 물건 임대차 계약 최종 체결', tags:['예정'], status:'todo' },
+  { month:'2026.06', title:'인테리어 공사', desc:'테스트핏 기반 레이아웃 공사 및 가구 납품', tags:['예정'], status:'todo' },
+  { month:'2026.07', title:'이전 완료', desc:'IT 인프라 이전, 임직원 입주, 운영 개시', tags:['목표'], status:'todo' },
+];
+const tl = document.getElementById('timeline');
+tl.innerHTML = TIMELINE.map(t=>`
+  <div class="timeline-item">
+    <div class="timeline-dot ${t.status}"></div>
+    <div class="timeline-month">${t.month}</div>
+    <div class="timeline-title">${t.title}</div>
+    <div class="timeline-desc">${t.desc}</div>
+    <div class="timeline-tags">${t.tags.map(tag=>`<span class="tl-tag ${t.status==='active'?'active':''}">${tag}</span>`).join('')}</div>
+  </div>`).join('');
+
+// ── FLOOR PLAN CAD-STYLE ──────────────────────────────────────────
+let currentFloor = 'office';
+
+// ── SVG helpers ──
+const _r = (x,y,w,h,fill,stroke,sw=1,rx=0) =>
+  `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" rx="${rx}"/>`;
+const _l = (x1,y1,x2,y2,clr='#333',w=1,dash='') =>
+  `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${clr}" stroke-width="${w}" ${dash?`stroke-dasharray="${dash}"`:''} stroke-linecap="round"/>`;
+const _t = (x,y,s,size=9,clr='#1e293b',anchor='middle',weight='400') =>
+  `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${size}" fill="${clr}" font-weight="${weight}" font-family="Pretendard,Arial,sans-serif">${s}</text>`;
+
+// Wall block
+const wall = (x,y,w,h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#2c2c2c"/>`;
+
+// Door arc: x,y = hinge point, size = door width, sweep 0=CCW 1=CW, dx,dy = door direction
+function doorArc(x,y,size,rx,ry,sweep) {
+  return `<path d="M${x},${y} L${x+rx*size},${y+ry*size} A${size},${size} 0 0 ${sweep} ${x},${y}" fill="rgba(255,255,255,0)" stroke="#2c2c2c" stroke-width="0.8"/>`;
+}
+
+// Dimension line (horizontal)
+function dimH(x1,x2,y,label) {
+  const my = y - 5;
+  return `${_l(x1,y,x2,y,'#7c8fa0',0.6)}${_l(x1,y-3,x1,y+3,'#7c8fa0',0.6)}${_l(x2,y-3,x2,y+3,'#7c8fa0',0.6)}${_t((x1+x2)/2,my,label,7,'#64748b','middle','400')}`;
+}
+function dimV(x,y1,y2,label) {
+  const mx = x - 4;
+  return `${_l(x,y1,x,y2,'#7c8fa0',0.6)}${_l(x-3,y1,x+3,y1,'#7c8fa0',0.6)}${_l(x-3,y2,x+3,y2,'#7c8fa0',0.6)}<text x="${mx}" y="${(y1+y2)/2}" text-anchor="middle" font-size="7" fill="#64748b" font-family="Arial,sans-serif" transform="rotate(-90,${mx},${(y1+y2)/2})">${label}</text>`;
+}
+
+// Single desk + chair (dir: 'n'=chair above, 's'=chair below)
+function deskUnit(x,y,w=40,d=18,dir='s') {
+  let h = _r(x,y,w,d,'#f0f4f9','#6b7a99',0.7,1);
+  // monitor
+  h += _r(x+w*0.28,y+3,w*0.44,d*0.55,'#d0d8ea','#6b7a99',0.5,1);
+  // chair
+  const cx=x+w/2, cy=dir==='s'?y+d+1:y-13;
+  h += _r(cx-9,cy,18,11,'#e2e8f4','#6b7a99',0.6,4);
+  return h;
+}
+
+// 2-desk back-to-back cluster
+function deskPair(x,y,w=40,deskH=17) {
+  let h = '';
+  // top desk (chairs pointing up/north)
+  h += _r(x,y,w,deskH,'#eef2f9','#7a8db0',0.75,1);
+  h += _r(x+w*0.28,y+3,w*0.44,deskH*0.5,'#ccd3e4','#7a8db0',0.5,1);
+  h += _r(x+w*0.1,y-12,w*0.8,10,'#dde2f0','#7a8db0',0.6,3);
+  // bottom desk (chairs pointing south)
+  const dy = y+deskH+4;
+  h += _r(x,dy,w,deskH,'#eef2f9','#7a8db0',0.75,1);
+  h += _r(x+w*0.28,dy+4,w*0.44,deskH*0.5,'#ccd3e4','#7a8db0',0.5,1);
+  h += _r(x+w*0.1,dy+deskH+2,w*0.8,10,'#dde2f0','#7a8db0',0.6,3);
+  return h;
+}
+
+// Conference table + chairs
+function confTable(cx,cy,tw,th,seats=6) {
+  let h = _r(cx-tw/2,cy-th/2,tw,th,'#e8f0e8','#5a7a5a',0.8,4);
+  // chairs along long sides
+  const chairW=12, chairH=9;
+  for(let i=0;i<seats/2;i++){
+    const px = cx-tw/2+12+(i*(tw-24)/(seats/2-1||1));
+    h += _r(px-chairW/2, cy-th/2-chairH-2, chairW, chairH,'#dde4dd','#5a7a5a',0.6,3);
+    h += _r(px-chairW/2, cy+th/2+2, chairW, chairH,'#dde4dd','#5a7a5a',0.6,3);
+  }
+  return h;
+}
+
+// Round table + chairs
+function roundTable(cx,cy,r,seats=4) {
+  let h = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#e8f0e8" stroke="#5a7a5a" stroke-width="0.8"/>`;
+  for(let i=0;i<seats;i++){
+    const a=(i/seats)*Math.PI*2 - Math.PI/2;
+    const cr=r+10, rx=cx+Math.cos(a)*cr, ry=cy+Math.sin(a)*cr;
+    h += `<ellipse cx="${rx}" cy="${ry}" rx="9" ry="7" fill="#dde4dd" stroke="#5a7a5a" stroke-width="0.6" transform="rotate(${(a*180/Math.PI)+90},${rx},${ry})"/>`;
+  }
+  return h;
+}
+
+// Sofa set (L-shape)
+function sofaSet(x,y) {
+  let h = '';
+  h += _r(x,y,60,16,'#e8e0f0','#7a6a9a',0.7,3);      // main sofa
+  h += _r(x,y+18,20,40,'#e8e0f0','#7a6a9a',0.7,3);    // side sofa
+  h += _r(x+8,y+60,46,14,'#ded5ee','#7a6a9a',0.6,2);  // coffee table
+  return h;
+}
+
+// Exec desk + credenza
+function execDesk(x,y) {
+  let h = '';
+  h += _r(x,y,70,30,'#e8edf5','#5a6a8a',0.8,2);    // main desk
+  h += _r(x+5,y+5,44,16,'#d0d8ea','#5a6a8a',0.5,1); // surface
+  h += _r(x+72,y,28,30,'#dde3ef','#5a6a8a',0.7,2);  // return
+  h += _r(x+20,y+34,22,12,'#d8dff0','#5a6a8a',0.6,4); // chair
+  return h;
+}
+
+// Pantry counter
+function pantry(x,y,w,h) {
+  let s = '';
+  s += _r(x,y,w,20,'#f5f0e0','#9a8a60',0.7,2); // counter
+  s += `<circle cx="${x+15}" cy="${y+10}" r="7" fill="#d0e8e8" stroke="#60a0a0" stroke-width="0.7"/>`;
+  s += `<circle cx="${x+15}" cy="${y+10}" r="3" fill="none" stroke="#60a0a0" stroke-width="0.6"/>`;
+  s += _r(x+28,y+3,22,13,'#e0d8c0','#9a8a60',0.5,2); // microwave
+  return s;
+}
+
+// Stairs symbol
+function stairs(x,y,w,h,steps=5) {
+  let s = _r(x,y,w,h,'#e8ecf0','#8090a0',0.7,1);
+  for(let i=1;i<steps;i++){
+    s += _l(x,y+i*(h/steps),x+w,y+i*(h/steps),'#a0b0c0',0.5);
+  }
+  return s;
+}
+
+// ── OFFICE FLOOR (10~12F) ──────────────────────────────────────────
+function drawOfficePlan() {
+  const W = '#2c2c2c'; // wall color
+  let h = '';
+
+  // ── defs: grid pattern ──
+  h += `<defs>
+    <pattern id="cadgrid" width="22" height="22" patternUnits="userSpaceOnUse">
+      <path d="M22 0L0 0 0 22" fill="none" stroke="#e4eaf2" stroke-width="0.4"/>
+    </pattern>
+    <pattern id="hatch45" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="5" stroke="#b0b8c4" stroke-width="1.2"/>
+    </pattern>
+  </defs>`;
+
+  // ── background ──
+  h += _r(0,0,800,490,'#f7f9fb','none');
+  h += _r(18,18,764,454,'url(#cadgrid)','none');
+
+  // ── room fills (inside walls) ──
+  // DK work area
+  h += _r(26,26,520,360,'#EDF4FB','none');
+  // right rooms zone
+  h += _r(554,26,228,360,'#f8fafb','none');
+  // corridor
+  h += _r(26,394,756,50,'#F1F5F9','none');
+  // individual right room fills
+  h += _r(554,26,228,118,'#EAF7F0','none');   // 소회의실
+  h += _r(554,152,228,96,'#FEF9E7','none');   // 탕비실
+  h += _r(554,256,228,130,'#F3EEF9','none');  // 프라이빗 오피스
+  h += _r(554,394,228,50,'#FEF3E2','none');   // 접견실 (in corridor strip)
+
+  // ── outer walls ──
+  h += _r(18,18,766,8,W,W);   // north
+  h += _r(18,436,766,8,W,W);  // south
+  h += _r(18,18,8,426,W,W);   // west
+  h += _r(776,18,8,426,W,W);  // east
+
+  // ── corridor partition wall ──
+  h += _r(26,386,528,8,W,W);
+  // gap for door to DK area at x=200
+  h += _r(26,386,148,8,W,W);
+  // (no: make continuous, doors are openings)
+
+  // ── main vertical divider (DK | right rooms) at x=546 ──
+  // North portion: y26-144
+  h += _r(546,26,8,118,W,W);
+  // door opening y=144-174 (30px)
+  // South portion: y174-386
+  h += _r(546,174,8,220,W,W);
+
+  // ── right room horizontal partitions ──
+  h += _r(546,144,238,8,W,W);  // between 소회의실 + 탕비실
+  h += _r(546,248,238,8,W,W);  // between 탕비실 + 프라이빗
+  h += _r(546,386,238,8,W,W);  // between 프라이빗 + 접견실(corridor)
+
+  // ── DK internal aisle walls (light partition) ──
+  // horizontal aisle dividers — dashed light line for clarity
+  h += _l(26,212,546,212,'#b0bece',1,'4,3');
+  h += _l(26,318,546,318,'#b0bece',1,'4,3');
+
+  // ── DOOR arcs ──
+  // Door from corridor to DK area
+  h += `<path d="M140,386 L140,360 A26,26 0 0 1 166,386" fill="rgba(250,252,255,0.4)" stroke="${W}" stroke-width="0.9"/>`;
+  h += _r(140,382,26,4,'#f7f9fb',W,0.5); // door gap fill
+  // Door to 소회의실
+  h += `<path d="M546,152 L520,152 A26,26 0 0 0 546,126" fill="rgba(250,252,255,0.4)" stroke="${W}" stroke-width="0.9"/>`;
+  h += _r(542,144,4,30,'#EAF7F0',W,0.5);
+  // Door to 탕비실
+  h += `<path d="M554,256 L578,256 A24,24 0 0 0 554,232" fill="rgba(250,252,255,0.4)" stroke="${W}" stroke-width="0.9"/>`;
+  h += _r(554,248,4,24,'#FEF9E7',W,0.5);
+  // Door to 프라이빗 오피스
+  h += `<path d="M554,320 L578,320 A24,24 0 0 1 554,296" fill="rgba(250,252,255,0.4)" stroke="${W}" stroke-width="0.9"/>`;
+
+  // ── DK workstation grid ──
+  // Zone A (y:40-208): 4 clusters of 6 desk-pairs each
+  // Zone B (y:226-380): 4 clusters of 6
+  const DX=42, DY=38, GX=56, GY=72;
+  const ox=40, oy=42;
+  for(let row=0;row<4;row++){
+    for(let col=0;col<6;col++){
+      h += deskPair(ox+col*GX, oy+row*GY, DX, DY*0.46);
+    }
+  }
+  const oy2=320;
+  for(let row=0;row<2;row++){
+    for(let col=0;col<6;col++){
+      h += deskPair(ox+col*GX, oy2+row*GY, DX, DY*0.46);
+    }
+  }
+
+  // ── 소회의실 furniture ──
+  h += confTable(660,86,100,56,6);
+
+  // ── 탕비실 furniture ──
+  h += pantry(560,162,200,40);
+  h += _r(560,186,85,48,'#f0ece0','#9a8a60',0.6,2); // cabinet
+  h += _r(650,186,60,48,'#f0ece0','#9a8a60',0.6,2); // cabinet
+
+  // ── 프라이빗 오피스 furniture ──
+  h += execDesk(570,274);
+
+  // ── 접견실 (corridor strip) ──
+  h += sofaSet(600,400);
+
+  // ── Core: E/V + stairs ──
+  h += _r(18,444,8,8,W,W); // just show core below corridor as hatch
+  // E/V boxes
+  h += _r(556,444,70,18,'#dde3ea','#8090a0',0.7,1);
+  h += _r(630,444,70,18,'#dde3ea','#8090a0',0.7,1);
+  h += stairs(706,444,68,18,4);
+  h += _t(556+35,456,'E/V',7,'#607080','middle','400');
+  h += _t(630+35,456,'E/V',7,'#607080','middle','400');
+  h += _t(706+34,456,'계단',7,'#607080','middle','400');
+  h += _r(18,444,538,18,'none','#8090a0',0.7); // corridor floor line
+
+  // ── Room labels ──
+  h += _t(286,196,'DK 업무공간',13,'#1e3a5c','middle','800');
+  h += _t(286,212,'63석 / 층   ·   10 ~ 12F',9,'#5a7a9a','middle','500');
+  h += _t(286,404,'복  도',9,'#7a8fa0','middle','500');
+  h += _t(660,90,'소회의실',9,'#166534','middle','700');
+  h += _t(660,102,'(5.9py)',8,'#4a8a5a','middle','400');
+  h += _t(660,196,'탕비실',9,'#78520a','middle','700');
+  h += _t(660,208,'(4.0py)',8,'#9a6a20','middle','400');
+  h += _t(660,310,'프라이빗 오피스',9,'#5521b5','middle','700');
+  h += _t(660,322,'(4.4py)',8,'#7a3ad0','middle','400');
+  h += _t(686,412,'접견실 (3.0py)',8,'#92400e','middle','600');
+
+  // ── Dimension lines ──
+  h += dimH(26,546,12,'38,500mm');
+  h += dimH(554,782,12,'13,300mm');
+  h += dimV(10,26,386,'26,000mm');
+
+  // ── Border ──
+  h += `<rect x="18" y="18" width="766" height="426" fill="none" stroke="#8090a0" stroke-width="1"/>`;
+
+  return h;
+}
+
+// ── TOP FLOOR (13F) ────────────────────────────────────────────────
+function drawTopFloorPlan() {
+  const W = '#2c2c2c';
+  let h = '';
+
+  h += `<defs>
+    <pattern id="cadgrid2" width="22" height="22" patternUnits="userSpaceOnUse">
+      <path d="M22 0L0 0 0 22" fill="none" stroke="#e4eaf2" stroke-width="0.4"/>
+    </pattern>
+  </defs>`;
+  h += _r(0,0,800,490,'#f7f9fb','none');
+  h += _r(18,18,764,454,'url(#cadgrid2)','none');
+
+  // room fills
+  h += _r(26,26,368,240,'#FFF3E8','none');   // 쇼룸
+  h += _r(402,26,188,240,'#E9F7EE','none');  // 대표실
+  h += _r(26,274,368,162,'#E8F1FB','none');  // 라운지
+  h += _r(402,274,188,100,'#F2EAF9','none'); // 회의실
+  h += _r(402,382,188,54,'#EFF2F4','none');  // 창고
+  h += _r(598,26,180,410,'#ECEFF1','none');  // 코어
+
+  // outer walls
+  h += _r(18,18,766,8,W,W);
+  h += _r(18,436,766,8,W,W);
+  h += _r(18,18,8,426,W,W);
+  h += _r(776,18,8,426,W,W);
+
+  // partitions
+  h += _r(394,26,8,410,W,W);   // vertical: showroom|대표실
+  h += _r(590,18,8,426,W,W);   // vertical: right side|core
+  h += _r(26,266,572,8,W,W);   // horiz: showroom|라운지
+  h += _r(394,374,204,8,W,W);  // horiz: 회의실|창고
+
+  // doors
+  h += `<path d="M394,206 L368,206 A26,26 0 0 1 394,180" fill="rgba(250,252,255,0.4)" stroke="${W}" stroke-width="0.9"/>`;
+  h += _r(390,180,4,26,'#E9F7EE',W,0.5);
+  h += `<path d="M394,330 L368,330 A26,26 0 0 0 394,304" fill="rgba(250,252,255,0.4)" stroke="${W}" stroke-width="0.9"/>`;
+  h += _r(390,304,4,26,'#F2EAF9',W,0.5);
+  h += `<path d="M162,266 L162,240 A26,26 0 0 1 188,266" fill="rgba(250,252,255,0.4)" stroke="${W}" stroke-width="0.9"/>`;
+  h += _r(162,262,26,4,'#E8F1FB',W,0.5);
+
+  // 쇼룸 furniture: display table + visitor chairs
+  h += confTable(210,90,160,70,8);
+  h += roundTable(170,200,26,5);
+  h += roundTable(100,150,20,4);
+
+  // 대표실 furniture
+  h += execDesk(416,60);
+  h += sofaSet(410,150);
+  h += confTable(490,200,80,50,4);
+
+  // 라운지 furniture
+  h += sofaSet(60,296);
+  h += sofaSet(160,296);
+  h += roundTable(270,350,30,6);
+  h += confTable(100,380,80,40,4);
+
+  // 회의실
+  h += confTable(490,316,150,64,8);
+
+  // 창고
+  h += _r(408,388,72,40,'#e0e4e8','#8090a0',0.6,2);
+  h += _r(488,388,72,40,'#e0e4e8','#8090a0',0.6,2);
+
+  // 코어: E/V + stairs
+  h += _r(598,26,85,200,'#dde3ea','#8090a0',0.7,1);
+  h += stairs(690,26,88,180,7);
+  h += _r(598,234,180,60,'#e0e4e8','#8090a0',0.6,1);
+  h += _t(640,130,'E / V',9,'#607080','middle','400');
+  h += _t(734,120,'계  단',9,'#607080','middle','400');
+  h += _t(688,264,'화장실',8,'#607080','middle','400');
+
+  // labels
+  h += _t(210,148,'쇼  룸',14,'#c2410c','middle','800');
+  h += _t(210,164,'(60py)',9,'#ea580c','middle','400');
+  h += _t(490,96,'대표실',11,'#166534','middle','700');
+  h += _t(490,110,'(20py)',8,'#4a8a5a','middle','400');
+  h += _t(210,360,'라  운  지',13,'#1e40af','middle','800');
+  h += _t(210,376,'(22py)',9,'#3b82f6','middle','400');
+  h += _t(490,344,'회의실',10,'#5521b5','middle','700');
+  h += _t(490,357,'(24py)',8,'#7a3ad0','middle','400');
+  h += _t(490,414,'창  고  (4py)',8,'#60748a','middle','500');
+
+  h += dimH(26,394,12,'26,000mm');
+  h += dimH(402,590,12,'13,200mm');
+  h += dimV(10,26,436,'26,000mm');
+  h += `<rect x="18" y="18" width="766" height="426" fill="none" stroke="#8090a0" stroke-width="1"/>`;
+
+  return h;
+}
+
+function renderFloorPlan(type) {
+  const svg = document.getElementById('floorplanSvg');
+  svg.setAttribute('viewBox','0 0 800 470');
+  svg.innerHTML = type === 'office' ? drawOfficePlan() : drawTopFloorPlan();
+
+  const legends = {
+    office:[
+      {fill:'#EDF4FB',stroke:'#93C5FD',label:'DK 업무공간 (63석/층)'},
+      {fill:'#EAF7F0',stroke:'#6EE7B7',label:'소회의실'},
+      {fill:'#FEF9E7',stroke:'#FDE047',label:'탕비실'},
+      {fill:'#F3EEF9',stroke:'#C4B5FD',label:'프라이빗 오피스'},
+      {fill:'#FEF3E2',stroke:'#FCA5A5',label:'접견실'},
+    ],
+    top:[
+      {fill:'#FFF3E8',stroke:'#FED7AA',label:'쇼룸'},
+      {fill:'#E9F7EE',stroke:'#86EFAC',label:'대표실'},
+      {fill:'#E8F1FB',stroke:'#93C5FD',label:'라운지'},
+      {fill:'#F2EAF9',stroke:'#E9D5FF',label:'회의실'},
+      {fill:'#ECEFF1',stroke:'#CBD5E1',label:'코어 (E/V·계단)'},
+    ]
+  };
+  document.getElementById('roomLegend').innerHTML = legends[type].map(l=>`
+    <div class="room-legend-item">
+      <div class="room-legend-dot" style="background:${l.fill};border:1.5px solid ${l.stroke}"></div>
+      <span>${l.label}</span>
+    </div>`).join('');
+}
+
+renderFloorPlan('office');
+
+function switchFloor(btn, type) {
+  document.querySelectorAll('.floor-tab').forEach(el=>el.classList.remove('active'));
+  btn.classList.add('active');
+  currentFloor = type;
+  renderFloorPlan(type);
+}
+
+// ── STEPPER CONTROL ───────────────────────────────────────────────
+function stepChange(id, delta, limit) {
+  const el = document.getElementById(id);
+  let val = parseInt(el.textContent) + delta;
+  const min = delta < 0 ? limit : 0;
+  const max = delta > 0 ? limit : 99;
+  val = Math.max(min, Math.min(max, val));
+  el.textContent = val;
+}
+
+// ── GENERATE BUTTON ───────────────────────────────────────────────
+function runGenerate() {
+  const btn = document.getElementById('generateBtn');
+  const spinner = document.getElementById('genSpinner');
+  const txt = document.getElementById('generateBtnText');
+  if(btn.classList.contains('loading')) return;
+  btn.classList.add('loading');
+  spinner.style.display = 'block';
+  txt.textContent = 'AI 분석 중…';
+  let dots = 0;
+  const stages = ['공간 분석 중…','배치 최적화 중…','레이아웃 생성 중…','마무리 중…'];
+  let si = 0;
+  const interval = setInterval(()=>{
+    if(si < stages.length) { txt.textContent = stages[si++]; }
+  }, 600);
+  setTimeout(()=>{
+    clearInterval(interval);
+    btn.classList.remove('loading');
+    spinner.style.display = 'none';
+    txt.textContent = '재생성';
+    // Animate stats — reflect current stepper values
+    const smRoom = parseInt(document.getElementById('spSmRoom').textContent);
+    const lgRoom = parseInt(document.getElementById('spLgRoom').textContent);
+    const seats = [174, 189, 203, 216];
+    document.getElementById('statSeats').textContent = seats[Math.floor(Math.random()*seats.length)];
+    document.getElementById('statMeeting').textContent = smRoom + lgRoom;
+    const effVals = [88,90,92,94,95];
+    document.getElementById('statEff').textContent = effVals[Math.floor(Math.random()*effVals.length)] + '%';
+    renderFloorPlan(currentFloor);
+  }, 2600);
+}
+
+// ── SECTION FADE-IN ────────────────────────────────────────────────
+(function() {
+  const secs = document.querySelectorAll('.section');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.04 });
+  secs.forEach(s => {
+    if (s.id === 's0') s.classList.add('in-view'); // hero always visible
+    else obs.observe(s);
+  });
+})();
+
+// ── SCORE BAR SCROLL ANIMATION ────────────────────────────────────
+(function() {
+  const fills = document.querySelectorAll('.env-score-fill');
+  fills.forEach(el => {
+    const target = el.style.width;
+    el.style.width = '0';
+    el.dataset.target = target;
+  });
+  const barObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        setTimeout(() => { el.style.width = el.dataset.target; }, 250);
+        barObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.1 });
+  fills.forEach(el => barObs.observe(el));
+})();
+
+// ── ENOC COUNT-UP ──────────────────────────────────────────────────
+(function() {
+  const countUp = (el, target, duration) => {
+    const start = performance.now();
+    const update = now => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * ease).toLocaleString();
+      if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  };
+  const enocObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const nums = e.target.querySelectorAll('.enoc-num');
+        nums.forEach((el, i) => {
+          const val = parseInt(el.textContent.replace(/,/g,''));
+          if (!isNaN(val)) setTimeout(() => countUp(el, val, 800), i * 80);
+        });
+        enocObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  const grid = document.getElementById('buildingsGrid');
+  if (grid) enocObs.observe(grid);
+})();
+
+// ── SCROLL SPY ────────────────────────────────────────────────────
+const sectionIds = ['s0','s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+const navLinks = document.querySelectorAll('.nav-item');
+
+function setActive(el) {
+  navLinks.forEach(l=>l.classList.remove('active'));
+  el.classList.add('active');
+}
+
+window.addEventListener('scroll', ()=>{
+  const scrollY = window.scrollY + window.innerHeight/3;
+  let cur = 's0';
+  sectionIds.forEach(id=>{
+    const el = document.getElementById(id);
+    if(el && el.offsetTop <= scrollY) cur = id;
+  });
+  navLinks.forEach(l=>{
+    const href = l.getAttribute('href');
+    l.classList.toggle('active', href === '#'+cur);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
