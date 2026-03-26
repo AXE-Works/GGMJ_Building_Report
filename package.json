@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "GenstarMate AI 오피스 이전 검토 리포트",
   "scripts": {
-    "dev": "npx serve . -p 3000 --no-clipboard",
-    "start": "npx serve . -p 3000"
+    "dev": "npx serve . -p 3001 --no-clipboard",
+    "start": "npx serve . -p 3001"
   },
   "private": true
 }

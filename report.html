@@ -14,8 +14,8 @@
     --primary: #1B3A5C;
     --primary-light: #2E5F94;
     --secondary: #2E75B6;
-    --accent: #00A3E0;
-    --accent-light: #E8F6FC;
+    --accent: #3B4DF7;
+    --accent-light: #ECEFFE;
     --bg: #F8FAFC;
     --bg-card: #FFFFFF;
     --border: #E2E8F0;
@@ -71,7 +71,7 @@
   .header-spacer { flex: 1; }
   .header-date { color: rgba(255,255,255,.6); font-size: 12px; }
   .header-ai-badge {
-    background: rgba(0,163,224,.2); border: 1px solid rgba(0,163,224,.4);
+    background: rgba(59,77,247,.2); border: 1px solid rgba(59,77,247,.4);
     color: var(--accent); font-size: 11px; font-weight: 600;
     padding: 4px 10px; border-radius: 20px; letter-spacing: .3px;
     display: flex; align-items: center; gap: 5px;
@@ -199,22 +199,22 @@
 
   /* ── S0: HERO ── */
   #s0 {
-    background: linear-gradient(135deg, var(--primary) 0%, #0d2440 60%, #0a1f38 100%);
+    background: linear-gradient(135deg, #3B4DF7 0%, #2D3EE0 55%, #2230CC 100%);
     padding: 64px 48px; border-bottom: none;
-    border-radius: 10px; box-shadow: 0 4px 24px rgba(27,58,92,.18);
+    border-radius: 10px; box-shadow: 0 4px 32px rgba(59,77,247,.35);
     opacity: 1 !important; transform: none !important; /* always visible */
   }
   .hero-kicker {
     font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 16px;
+    color: rgba(255,255,255,.65); margin-bottom: 16px;
     display: flex; align-items: center; gap: 8px;
   }
-  .hero-kicker::before { content: ''; display: block; width: 24px; height: 2px; background: var(--accent); }
+  .hero-kicker::before { content: ''; display: block; width: 24px; height: 2px; background: rgba(255,255,255,.65); }
   .hero-title { font-size: 40px; font-weight: 900; color: #fff; letter-spacing: -1px; line-height: 1.2; margin-bottom: 10px; }
-  .hero-title span { color: var(--accent); }
+  .hero-title span { color: #C7D2FE; }
   .hero-sub { font-size: 17px; color: rgba(255,255,255,.65); margin-bottom: 40px; }
   .hero-stats { display: flex; gap: 40px; margin-bottom: 48px; }
-  .hero-stat { border-left: 3px solid var(--accent); padding-left: 16px; }
+  .hero-stat { border-left: 3px solid rgba(255,255,255,.4); padding-left: 16px; }
   .hero-stat .val { font-size: 28px; font-weight: 800; color: #fff; }
   .hero-stat .lbl { font-size: 12px; color: rgba(255,255,255,.55); margin-top: 2px; }
   .hero-top3-label {
@@ -223,27 +223,68 @@
   }
   .hero-top3 { display: flex; gap: 16px; }
   .hero-top3-card {
-    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14);
-    border-radius: var(--radius); padding: 24px;
+    background: rgba(0,0,0,.20); border: 1px solid rgba(255,255,255,.22);
+    border-radius: 10px; padding: 20px 22px;
     flex: 1; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; gap: 0;
   }
   .hero-top3-card .rank {
-    position: absolute; top: 14px; right: 16px;
-    font-size: 48px; font-weight: 900; color: rgba(255,255,255,.04);
+    position: absolute; top: 12px; right: 16px;
+    font-size: 52px; font-weight: 900; color: rgba(255,255,255,.07);
     line-height: 1;
   }
-  .hero-top3-card .building-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  /* 헤더 영역 */
+  .hero-top3-card .card-head { margin-bottom: 12px; }
+  .hero-top3-card .building-name { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 6px; line-height: 1.3; }
+  .hero-top3-card .card-badges { display: flex; align-items: center; gap: 6px; }
   .hero-top3-card .district-tag {
-    font-size: 10px; font-weight: 600; padding: 2px 8px;
-    border-radius: 10px; display: inline-block; margin-bottom: 12px;
+    font-size: 10px; font-weight: 700; padding: 2px 8px;
+    border-radius: 10px; display: inline-block;
   }
-  .hero-top3-card .enoc-val { font-size: 22px; font-weight: 800; color: var(--accent); }
-  .hero-top3-card .enoc-lbl { font-size: 11px; color: rgba(255,255,255,.5); }
-  .hero-top3-card .reason { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 10px; border-top: 1px solid rgba(255,255,255,.1); padding-top: 10px; }
+  .hero-top3-card .grade-tag {
+    font-size: 10px; font-weight: 700; padding: 2px 8px;
+    border-radius: 10px; display: inline-block;
+    background: rgba(255,255,255,.15); color: rgba(255,255,255,.9);
+  }
+  /* ENOC 영역 */
+  .hero-top3-card .enoc-block { margin-bottom: 14px; }
+  .hero-top3-card .enoc-lbl { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: rgba(255,255,255,.55); margin-bottom: 2px; }
+  .hero-top3-card .enoc-val { font-size: 26px; font-weight: 900; color: #fff; line-height: 1; }
+  .hero-top3-card .enoc-unit { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.6); margin-left: 3px; }
+  /* 비용 분해 그리드 */
+  .hero-top3-card .cost-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px; margin-bottom: 12px;
+    background: rgba(0,0,0,.18); border-radius: 8px; padding: 10px 12px;
+  }
+  .hero-top3-card .cost-item .ci-label {
+    font-size: 9px; font-weight: 700; letter-spacing: .6px;
+    text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 3px;
+  }
+  .hero-top3-card .cost-item .ci-val {
+    font-size: 13px; font-weight: 700; color: #fff;
+  }
+  /* 하단 정보 행 */
+  .hero-top3-card .info-row {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; margin-bottom: 10px;
+  }
+  .hero-top3-card .info-chip {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 11px; color: rgba(255,255,255,.75);
+  }
+  .hero-top3-card .info-chip svg { opacity: .7; }
+  /* 이유 텍스트 */
+  .hero-top3-card .reason {
+    font-size: 11px; color: rgba(255,255,255,.8);
+    border-top: 1px solid rgba(255,255,255,.15); padding-top: 10px; margin-top: auto;
+    display: flex; align-items: flex-start; gap: 5px;
+  }
+  .hero-top3-card .reason::before { content: '✦'; font-size: 9px; color: rgba(255,255,255,.45); flex-shrink: 0; margin-top: 1px; }
   .badge-green { background: rgba(16,185,129,.2); color: #6EE7B7; }
   .badge-amber { background: rgba(245,158,11,.2); color: #FCD34D; }
   .badge-red { background: rgba(239,68,68,.2); color: #FCA5A5; }
-  .badge-blue { background: rgba(0,163,224,.2); color: #7DD3FC; }
+  .badge-blue { background: rgba(59,77,247,.2); color: #7DD3FC; }
 
   /* ── S1: CONDITIONS ── */
   .cond-strip {
@@ -327,7 +368,7 @@
     cursor: pointer; transition: all .18s;
     display: flex; align-items: center; gap: 12px;
   }
-  .map-list-item:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,163,224,.15); }
+  .map-list-item:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(59,77,247,.15); }
   .map-list-item.highlighted { border-color: var(--accent); background: var(--accent-light); }
   .map-pin-num {
     width: 26px; height: 26px; border-radius: 50%;
@@ -351,11 +392,11 @@
   .bldg-card:hover {
     transform: translateY(-5px);
     border-color: var(--accent);
-    box-shadow: 0 12px 32px rgba(0,163,224,.18), 0 2px 8px rgba(27,58,92,.06);
+    box-shadow: 0 12px 32px rgba(59,77,247,.18), 0 2px 8px rgba(27,58,92,.06);
   }
   .bldg-card.selected {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent), 0 8px 24px rgba(0,163,224,.16);
+    box-shadow: 0 0 0 2px var(--accent), 0 8px 24px rgba(59,77,247,.16);
   }
 
   /* Photo — separate inner div for zoom effect */
@@ -465,15 +506,36 @@
   .cost-table .note-cell { font-size: 11px; color: var(--text-muted); }
 
   /* ── S6: ENVIRONMENT ── */
-  .env-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .env-layout { display: grid; grid-template-columns: 340px 1fr; gap: 28px; align-items: start; }
+  .env-chart-panel {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    box-shadow: 0 1px 6px rgba(27,58,92,.05);
+    position: sticky; top: calc(var(--header-h) + 20px);
+  }
+  .env-chart-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+  .env-chart-sub { font-size: 11px; color: var(--text-light); margin-bottom: 16px; }
+  .env-chart-wrap { position: relative; height: 280px; }
+  .env-score-summary { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .env-score-chip {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #F8FAFC; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 7px 10px;
+  }
+  .env-score-chip .chip-label { font-size: 11px; color: var(--text-muted); }
+  .env-score-chip .chip-val { font-size: 13px; font-weight: 800; color: var(--primary); }
+  .env-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .env-card {
     background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 20px;
+    border-radius: var(--radius); padding: 18px 20px;
+    transition: box-shadow .2s, border-color .2s;
   }
-  .env-card .env-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
-  .env-card .env-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
-  .env-score { margin-top: 14px; }
-  .env-score-bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+  .env-card:hover { box-shadow: 0 4px 16px rgba(27,58,92,.1); border-color: var(--accent); }
+  .env-card .env-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .env-card .env-icon { font-size: 16px; }
+  .env-card .env-desc { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+  .env-score { margin-top: 12px; }
+  .env-score-bar { height: 5px; background: var(--border); border-radius: 3px; margin-top: 5px; overflow: hidden; }
   .env-score-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 1s cubic-bezier(.4,0,.2,1); }
   .env-score-label { font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; }
 
@@ -568,13 +630,13 @@
   .timeline-dot.done { background: var(--green); color: var(--green); }
   .timeline-dot.active { background: var(--accent); color: var(--accent); animation: ring 1.5s infinite; }
   .timeline-dot.todo { background: var(--border); color: var(--border); }
-  @keyframes ring { 0%,100%{box-shadow:0 0 0 2px currentColor} 50%{box-shadow:0 0 0 5px rgba(0,163,224,.3)} }
+  @keyframes ring { 0%,100%{box-shadow:0 0 0 2px currentColor} 50%{box-shadow:0 0 0 5px rgba(59,77,247,.3)} }
   .timeline-month { font-size: 11px; font-weight: 700; color: var(--text-light); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 4px; }
   .timeline-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
   .timeline-desc { font-size: 13px; color: var(--text-muted); }
   .timeline-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
   .tl-tag { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); }
-  .tl-tag.active { background: var(--accent-light); border-color: rgba(0,163,224,.3); color: var(--secondary); }
+  .tl-tag.active { background: var(--accent-light); border-color: rgba(59,77,247,.3); color: var(--secondary); }
 
   /* ── COMPARE BAR ── */
   #compareBar {
@@ -679,7 +741,7 @@
     <span class="logo-badge">AI</span>
   </div>
   <div class="header-divider"></div>
-  <div class="header-meta"><strong>SK네트웍스서비스</strong> 오피스 이전 검토 리포트</div>
+  <div class="header-meta"><strong>SK네트웍스서비스</strong> Office Relocation Report</div>
   <div class="header-spacer"></div>
   <div class="header-date">보고일: 2026.02.10</div>
   <div class="header-ai-badge">AI 분석 완료</div>
@@ -915,6 +977,20 @@
     <div class="section-tag">S4 · 물건 목록</div>
     <div class="section-title">후보 물건 상세</div>
     <div class="section-subtitle">건물 카드 클릭 시 비교 목록에 추가 (최대 4개)</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;padding:9px 14px;background:#F8FAFC;border:1px solid var(--border);border-radius:var(--radius);width:fit-content;">
+    <span style="font-size:10px;font-weight:700;color:var(--text-light);letter-spacing:.8px;text-transform:uppercase;margin-right:4px;">ENOC 비용 구간</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--green);">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;"></span>절감 (≤15만원/평)
+    </span>
+    <span style="color:var(--border);margin:0 2px;">|</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--amber);">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block;"></span>적정 (15~20만원/평)
+    </span>
+    <span style="color:var(--border);margin:0 2px;">|</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--red);">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;"></span>고비용 (>20만원/평)
+    </span>
   </div>
   <div class="buildings-grid" id="buildingsGrid"></div>
 </section>
@@ -1243,55 +1319,55 @@ const BUILDINGS = [
     rent:38500, mgmt:28500, ratio:49.44, floor:'지하2~지상7층', area:'3,300평', year:2001,
     parking:'1대/20평', subway:'DMC역 5분', grade:'A급',
     color:'#15803D', gradient:'linear-gradient(135deg,#166534,#15803D)',
-    bgPhoto:'linear-gradient(135deg,rgba(22,101,52,0.60),rgba(21,128,61,0.72)), url(https://loremflickr.com/600/200/office,building,city?lock=11) center/cover no-repeat',
+    bgPhoto:'linear-gradient(135deg,rgba(30,58,92,0.62),rgba(0,100,180,0.70)), url(https://loremflickr.com/600/200/office,building,city?lock=11) center/cover no-repeat',
     lat:37.5756, lng:126.8898, reason:'최저 ENOC — 비용 최적화 최우선 선택' },
   { id:1, name:'상암IT타워', district:'DMC', rank:'AI 추천 2위',
     rent:50000, mgmt:32000, ratio:54.70, floor:'지하3~지상21층', area:'10,000평', year:2009,
     parking:'1대/28평', subway:'DMC역 8분', grade:'A급',
     color:'#16A34A', gradient:'linear-gradient(135deg,#15803D,#22C55E)',
-    bgPhoto:'linear-gradient(135deg,rgba(21,128,61,0.60),rgba(34,197,94,0.72)), url(https://loremflickr.com/600/200/skyscraper,glass,facade?lock=22) center/cover no-repeat',
+    bgPhoto:'linear-gradient(135deg,rgba(40,65,100,0.62),rgba(0,110,190,0.70)), url(https://loremflickr.com/600/200/skyscraper,glass,facade?lock=22) center/cover no-repeat',
     lat:37.5769, lng:126.8921, reason:'IT인프라 완비, 대형 임차 가능' },
   { id:2, name:'S-CITY', district:'DMC', rank:'AI 추천 3위',
     rent:60000, mgmt:30000, ratio:54.65, floor:'지하4~지상22층', area:'8,500평', year:2012,
     parking:'1대/30평', subway:'DMC역 10분', grade:'A+급',
     color:'#0EA5E9', gradient:'linear-gradient(135deg,#0284C7,#0EA5E9)',
-    bgPhoto:'linear-gradient(135deg,rgba(2,132,199,0.60),rgba(14,165,233,0.72)), url(https://loremflickr.com/600/200/highrise,building,urban?lock=33) center/cover no-repeat',
+    bgPhoto:'linear-gradient(135deg,rgba(50,70,100,0.62),rgba(0,120,200,0.70)), url(https://loremflickr.com/600/200/highrise,building,urban?lock=33) center/cover no-repeat',
     lat:37.5779, lng:126.8909, reason:'신축급 시설, 비용 합리적' },
   { id:3, name:'한샘상암사옥', district:'DMC', rank:null,
     rent:63000, mgmt:35000, ratio:53.42, floor:'지하2~지상11층', area:'4,200평', year:2014,
     parking:'1대/25평', subway:'DMC역 7분', grade:'A급',
     color:'#6366F1', gradient:'linear-gradient(135deg,#4F46E5,#6366F1)',
-    bgPhoto:'linear-gradient(135deg,rgba(79,70,229,0.60),rgba(99,102,241,0.72)), url(https://loremflickr.com/600/200/corporate,office,tower?lock=44) center/cover no-repeat',
+    bgPhoto:'linear-gradient(135deg,rgba(35,55,85,0.62),rgba(0,90,170,0.70)), url(https://loremflickr.com/600/200/corporate,office,tower?lock=44) center/cover no-repeat',
     lat:37.5741, lng:126.8882, reason:'안정적 관리, 중소규모 적합' },
   { id:4, name:'용산 더프라임타워', district:'CBD', rank:null,
     rent:120000, mgmt:40000, ratio:62.03, floor:'지하5~지상20층', area:'6,800평', year:2018,
     parking:'1대/45평', subway:'용산역 3분', grade:'S급',
     color:'#1D4ED8', gradient:'linear-gradient(135deg,#1E3A8A,#1D4ED8)',
-    bgPhoto:'linear-gradient(135deg,rgba(30,58,138,0.60),rgba(29,78,216,0.72)), url(https://loremflickr.com/600/200/skyscraper,tower,architecture?lock=55) center/cover no-repeat',
+    bgPhoto:'linear-gradient(135deg,rgba(25,50,80,0.62),rgba(0,100,180,0.70)), url(https://loremflickr.com/600/200/skyscraper,tower,architecture?lock=55) center/cover no-repeat',
     lat:37.5297, lng:126.9648, reason:'용산 랜드마크, 접근성 최우수' },
   { id:5, name:'ENA센터', district:'CBD', rank:null,
     rent:75000, mgmt:38000, ratio:55.27, floor:'지하4~지상18층', area:'5,500평', year:2010,
     parking:'1대/55평', subway:'을지로입구역 5분', grade:'A급',
     color:'#2563EB', gradient:'linear-gradient(135deg,#1D4ED8,#3B82F6)',
-    bgPhoto:'linear-gradient(135deg,rgba(29,78,216,0.60),rgba(59,130,246,0.72)), url(https://loremflickr.com/600/200/office,glass,building?lock=66) center/cover no-repeat',
+    bgPhoto:'linear-gradient(135deg,rgba(45,65,95,0.62),rgba(0,115,195,0.70)), url(https://loremflickr.com/600/200/office,glass,building?lock=66) center/cover no-repeat',
     lat:37.5658, lng:126.9843, reason:'CBD 중심 접근, 상대적 저렴' },
   { id:6, name:'씨티센터타워', district:'CBD', rank:null,
     rent:130000, mgmt:47000, ratio:72.25, floor:'지하6~지상26층', area:'12,000평', year:2016,
     parking:'1대/60평', subway:'시청역 2분', grade:'S급',
     color:'#7C3AED', gradient:'linear-gradient(135deg,#6D28D9,#7C3AED)',
-    bgPhoto:'linear-gradient(135deg,rgba(109,40,217,0.60),rgba(124,58,237,0.72)), url(https://loremflickr.com/600/200/downtown,cityscape,building?lock=77) center/cover no-repeat',
+    bgPhoto:'linear-gradient(135deg,rgba(30,55,88,0.62),rgba(0,105,185,0.70)), url(https://loremflickr.com/600/200/downtown,cityscape,building?lock=77) center/cover no-repeat',
     lat:37.5641, lng:126.9759, reason:'시청역 초역세권 프라임 오피스' },
   { id:7, name:'교원명동빌딩', district:'CBD', rank:null,
     rent:105000, mgmt:47000, ratio:54.24, floor:'지하3~지상14층', area:'3,800평', year:2005,
     parking:'1대/70평', subway:'명동역 4분', grade:'A급',
     color:'#DC2626', gradient:'linear-gradient(135deg,#B91C1C,#DC2626)',
-    bgPhoto:'linear-gradient(135deg,rgba(185,28,28,0.60),rgba(220,38,38,0.72)), url(https://loremflickr.com/600/200/commercial,building,urban?lock=88) center/cover no-repeat',
+    bgPhoto:'linear-gradient(135deg,rgba(38,60,90,0.62),rgba(0,95,175,0.70)), url(https://loremflickr.com/600/200/commercial,building,urban?lock=88) center/cover no-repeat',
     lat:37.5603, lng:126.9826, reason:'명동 상권, 고객 접점 우수' },
   { id:8, name:'TOWER50', district:'CBD', rank:null,
     rent:119000, mgmt:41000, ratio:56.96, floor:'지하5~지상50층', area:'22,000평', year:2020,
     parking:'1대/50평', subway:'광화문역 6분', grade:'S급',
     color:'#0891B2', gradient:'linear-gradient(135deg,#0E7490,#06B6D4)',
-    bgPhoto:'linear-gradient(135deg,rgba(14,116,144,0.60),rgba(6,182,212,0.72)), url(https://loremflickr.com/600/200/tower,modern,architecture?lock=99) center/cover no-repeat',
+    bgPhoto:'linear-gradient(135deg,rgba(20,45,75,0.62),rgba(0,110,190,0.70)), url(https://loremflickr.com/600/200/tower,modern,architecture?lock=99) center/cover no-repeat',
     lat:37.5720, lng:126.9768, reason:'광화문 초대형 프리미엄 오피스' },
 ];
 
@@ -1308,15 +1384,58 @@ let selected = new Set();
 // ── HERO TOP 3 ─────────────────────────────────────────────────────
 (function renderHeroTop3() {
   const top3 = BUILDINGS.slice(0,3);
-  const badges = ['badge-green','badge-green','badge-green'];
   const el = document.getElementById('heroTop3');
   el.innerHTML = top3.map((b,i) => `
     <div class="hero-top3-card">
       <div class="rank">${i+1}</div>
-      <div class="building-name">${b.name}</div>
-      <span class="district-tag ${b.district==='DMC'?'badge-green':'badge-blue'}">${b.district}</span>
-      <div class="enoc-val">${fmt(b.enoc)}</div>
-      <div class="enoc-lbl">원/평 ENOC</div>
+
+      <div class="card-head">
+        <div class="building-name">${b.name}</div>
+        <div class="card-badges">
+          <span class="district-tag ${b.district==='DMC'?'badge-green':'badge-blue'}">${b.district}</span>
+          <span class="grade-tag">${b.grade}</span>
+        </div>
+      </div>
+
+      <div class="enoc-block">
+        <div class="enoc-lbl">ENOC (월 총비용)</div>
+        <div class="enoc-val">${fmt(b.enoc)}<span class="enoc-unit">원/평</span></div>
+      </div>
+
+      <div class="cost-grid">
+        <div class="cost-item">
+          <div class="ci-label">임대료</div>
+          <div class="ci-val">${fmt(b.rent)}</div>
+        </div>
+        <div class="cost-item">
+          <div class="ci-label">관리비</div>
+          <div class="ci-val">${fmt(b.mgmt)}</div>
+        </div>
+        <div class="cost-item">
+          <div class="ci-label">전용률</div>
+          <div class="ci-val">${b.ratio}%</div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-chip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          ${b.area} · ${b.floor}
+        </div>
+        <div class="info-chip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          준공 ${b.year}년
+        </div>
+        <div class="info-chip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          주차 ${b.parking}
+        </div>
+        <div class="info-chip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          ${b.subway}
+        </div>
+      </div>
+
       <div class="reason">${b.reason}</div>
     </div>
   `).join('');
@@ -1376,7 +1495,7 @@ let leafletMap, leafletMarkers = [];
           <div><div style="font-size:9px;color:#94A3B8;font-weight:600;text-transform:uppercase">주차</div><div style="font-size:13px;font-weight:700;color:#1A202C">${b.parking}</div></div>
         </div>
         <div style="font-size:12px;color:#64748B">🚇 ${b.subway}</div>
-        ${b.rank ? `<div style="margin-top:8px;font-size:11px;font-weight:700;color:#00A3E0;background:#E8F6FC;padding:4px 10px;border-radius:20px;display:inline-block">✦ ${b.rank}</div>` : ''}
+        ${b.rank ? `<div style="margin-top:8px;font-size:11px;font-weight:700;color:#3B4DF7;background:#E8F6FC;padding:4px 10px;border-radius:20px;display:inline-block">✦ ${b.rank}</div>` : ''}
       </div>`;
 
     const marker = L.marker([b.lat, b.lng], { icon })
@@ -1611,41 +1730,94 @@ new Chart(document.getElementById('marketChart'), {
 
 // ENOC Chart
 const sorted4chart = [...BUILDINGS].sort((a,b)=>a.enoc-b.enoc);
-new Chart(document.getElementById('enocChart'), {
+const _enocData   = sorted4chart.map(b => b.enoc);
+const _enocBgCol  = sorted4chart.map(b => {
+  const c = enocColor(b.enoc);
+  return c==='green' ? 'rgba(16,185,129,.85)' : c==='amber' ? 'rgba(245,158,11,.85)' : 'rgba(239,68,68,.85)';
+});
+const _enocHover  = sorted4chart.map(b => {
+  const c = enocColor(b.enoc);
+  return c==='green' ? '#10B981' : c==='amber' ? '#F59E0B' : '#EF4444';
+});
+
+// ── 인라인 값 라벨 플러그인 ──────────────────────────────────────────
+const enocValueLabelPlugin = {
+  id: 'enocValueLabels',
+  afterDatasetsDraw(chart) {
+    const ctx = chart.ctx;
+    const meta = chart.getDatasetMeta(0);
+    meta.data.forEach((bar, i) => {
+      const val = _enocData[i];
+      if (!val || bar.width < 30) return;
+      ctx.save();
+      ctx.font = '600 10px Pretendard, -apple-system, sans-serif';
+      ctx.fillStyle = 'rgba(15,23,42,0.72)';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(fmt(val) + '원', bar.x + 8, bar.y);
+      ctx.restore();
+    });
+  }
+};
+
+const enocChartInst = new Chart(document.getElementById('enocChart'), {
   type: 'bar',
+  plugins: [enocValueLabelPlugin],
   data: {
-    labels: sorted4chart.map(b=>b.name.length>5?b.name.slice(0,5)+'…':b.name),
+    labels: sorted4chart.map(b => b.name.length > 5 ? b.name.slice(0,5)+'…' : b.name),
     datasets: [{
       label: 'ENOC (원/평)',
-      data: sorted4chart.map(b=>b.enoc),
-      backgroundColor: sorted4chart.map(b=>{
-        const c=enocColor(b.enoc);
-        return c==='green'?'rgba(16,185,129,.82)':c==='amber'?'rgba(245,158,11,.82)':'rgba(239,68,68,.82)';
-      }),
-      borderColor: sorted4chart.map(b=>{
-        const c=enocColor(b.enoc);
-        return c==='green'?'#059669':c==='amber'?'#D97706':'#DC2626';
-      }),
-      borderWidth: 0, borderRadius: 6,
+      data: sorted4chart.map(() => 0),   // 뷰포트 진입 전 0으로 시작
+      backgroundColor: _enocBgCol,
+      hoverBackgroundColor: _enocHover,
+      borderWidth: 0,
+      borderRadius: 6,
     }]
   },
   options: {
     indexAxis: 'y',
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false },
-      tooltip: { callbacks: { label: ctx=>' '+fmt(ctx.raw)+'원/평' } }
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        padding: 10,
+        callbacks: {
+          title: ctx => sorted4chart[ctx[0].dataIndex].name,
+          label: ctx => [
+            '  ENOC : ' + fmt(ctx.raw) + ' 원/평',
+            '  임대료 : ' + fmt(sorted4chart[ctx[0].dataIndex].rent) + ' 원',
+            '  관리비 : ' + fmt(sorted4chart[ctx[0].dataIndex].mgmt) + ' 원',
+            '  전용률 : ' + sorted4chart[ctx[0].dataIndex].ratio + '%',
+          ]
+        }
+      }
     },
     animation: {
-      duration: 800,
-      easing: 'easeOutCubic',
-      delay: ctx => ctx.type === 'data' ? ctx.dataIndex * 80 : 0
+      duration: 1100,
+      easing: 'easeOutQuart',
+      delay: ctx => ctx.type === 'data' ? ctx.dataIndex * 110 : 0
     },
     scales: {
-      x: { grid: { color: '#EEF2F7' }, ticks: { callback: v=>(v/1000)+'K', font:{size:10} } },
+      x: {
+        grid: { color: '#EEF2F7' },
+        ticks: { callback: v => (v/1000)+'K', font:{size:10} },
+        max: Math.max(..._enocData) * 1.2
+      },
       y: { grid: { display: false }, ticks: { font:{size:11} } }
     }
   }
 });
+
+// ── 뷰포트 진입 시 애니메이션 트리거 ────────────────────────────────
+const _enocObserver = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    enocChartInst.data.datasets[0].data = _enocData;
+    enocChartInst.update();
+    _enocObserver.disconnect();
+  }
+}, { threshold: 0.25 });
+_enocObserver.observe(document.getElementById('s5'));
 
 // Radar Chart
 new Chart(document.getElementById('radarChart'), {
