@@ -759,8 +759,9 @@
   ══════════════════════════════════════ */
   @media (max-width: 768px) {
 
-    /* ── 수평 오버플로 차단 (html 제외 — child scroll 허용) ── */
-    body { overflow-x: hidden !important; width: 100% !important; }
+    /* ── 수평 오버플로 차단: clip = 자식 scroll context 유지 ── */
+    html { overflow-x: clip !important; }
+    body { overflow-x: clip !important; max-width: 100vw !important; }
 
     /* ── 사이드바 완전 제거 ── */
     #sidebar { display: none !important; }
@@ -773,23 +774,24 @@
     }
     @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 
-    /* ── 메인 레이아웃: 전폭 ── */
+    /* ── 메인 레이아웃: 뷰포트 폭 100% 고정 ── */
     #main {
       margin-left: 0 !important;
       margin-top: 56px !important;
       padding: 0 0 60px 0 !important;
-      width: 100% !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
       box-sizing: border-box !important;
       min-height: calc(100vh - 56px) !important;
     }
 
-    /* ── 섹션: 좌우 8px 마진만 ── */
+    /* ── 섹션: 뷰포트 기준 좌우 8px 마진 ── */
     .section {
       padding: 22px 16px !important;
       margin: 0 8px 8px 8px !important;
-      border-radius: 10px !important;
-      width: auto !important;
+      width: calc(100vw - 16px) !important;
       box-sizing: border-box !important;
+      border-radius: 10px !important;
     }
 
     /* ── Header ── */
@@ -809,7 +811,7 @@
     .card-title { font-size: 13px; }
 
     /* ── S0: Hero ── */
-    #s0 { padding: 28px 18px !important; margin: 0 8px 8px 8px !important; }
+    #s0 { padding: 28px 18px !important; margin: 0 8px 8px 8px !important; width: calc(100vw - 16px) !important; }
     .hero-kicker { font-size: 10px; }
     .hero-title { font-size: 22px !important; letter-spacing: -.5px; margin-bottom: 8px; }
     .hero-sub { font-size: 13px; margin-bottom: 20px; }
@@ -860,6 +862,15 @@
     .enoc-num { font-size: 20px !important; }
     .enoc-row { margin-bottom: 7px !important; padding-bottom: 7px !important; }
     .bldg-footer { padding: 6px 10px !important; }
+
+    /* ── 시장 차트 좌우 스크롤 ── */
+    .market-chart-scroll, .rent-chart-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .market-chart-scroll { overflow-x: visible !important; }
+    .market-chart-wrap { width: 100% !important; height: 210px !important; }
+    .rent-chart-wrap   { width: 380px; height: 185px !important; }
 
     /* ── ENOC 차트 좌우 스크롤 ── */
     .enoc-chart-scroll {
@@ -919,8 +930,8 @@
     .hero-top3-card .cost-grid { grid-template-columns: 1fr 1fr !important; }
     .bldg-specs { grid-template-columns: 1fr 1fr !important; }
     .env-score-summary { grid-template-columns: 1fr 1fr !important; }
-    .section { margin: 0 4px 8px 4px !important; }
-    #s0 { margin: 0 4px 8px 4px !important; }
+    .section { margin: 0 4px 8px 4px !important; width: calc(100vw - 8px) !important; }
+    #s0 { margin: 0 4px 8px 4px !important; width: calc(100vw - 8px) !important; }
   }
 </style>
 </head>
@@ -1121,14 +1132,18 @@
   <div class="market-grid">
     <div class="card">
       <div class="card-title">권역별 공실률 비교</div>
-      <div class="chart-wrap">
-        <canvas id="marketChart"></canvas>
+      <div class="market-chart-scroll">
+        <div class="market-chart-wrap chart-wrap">
+          <canvas id="marketChart"></canvas>
+        </div>
       </div>
     </div>
     <div class="card">
       <div class="card-title">CBD 임대료 추이 (원/평)</div>
-      <div class="chart-wrap">
-        <canvas id="rentChart"></canvas>
+      <div class="rent-chart-scroll">
+        <div class="rent-chart-wrap chart-wrap">
+          <canvas id="rentChart"></canvas>
+        </div>
       </div>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">2026 Q1 기준</div>
